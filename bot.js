@@ -37,13 +37,13 @@ client.on('message', function(msg){
 			}
 		} else if(command[0] === "init"){
 			if(! Object.keys(userDatas)){
-				userDatas[msg.author.id] = {balance: 10};
-				msg.reply('you now have a Potato Account');
+				msg.reply('you already have a Potato Account.');
 			}else{
-				msg.reply('you already have a potato account');
+				userDatas[msg.author.id] = {balance: 10};
+				msg.reply('you now have a Potato Account.');
 			}
 		} else if(command[0] === "bal"){
-			msg.reply(`you have ${userDatas[author.id].balance} monies`);
+			msg.reply(`you have ${userDatas[author.id].balance} monies.`);
 		}
 	} 
 });
