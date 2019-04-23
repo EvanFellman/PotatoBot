@@ -9,6 +9,7 @@ addToHelperString("help", "This will all of the commands you can use");
 addToHelperString("Create Account", "This will initialize your potato account");
 addToHelperString("bal", "Shows your balance");
 addToHelperString("funny picture", "Shows a random funny photo");
+addToHelperString("avatar @user", "This will show a person's avatar");
 
 /* read the token from token.txt */
 fs.readFile('token.txt',function(err,txt){
@@ -56,7 +57,10 @@ client.on('message', function(msg){
 			}
 		} else if(command[0] === "bal" || command[0] === "b" || command[0] === "balance"){			/* balance command */					
 			msg.reply(`you have ${userDatas[author.id].balance} monies.`);
-		}
+		} else if(command[0] === "avatar"){                                                               //show a user's avatar
+	      let otherUser = msg.mentions.users.first();
+	      msg.channel.send("", {file: otherUser.displayAvatarURL.substring(0, otherUser.displayAvatarURL.length - 9)});
+	    }
 	} 
 });
 
