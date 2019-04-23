@@ -45,19 +45,24 @@ client.on('message', function(msg){
 			}
 		} else if(!isUserInitialized(author)){
 			msg.reply("you do not have a Potato Account. To make a Potato Account run `" + STARTER + "Create Account`");
-		} else if(command[0] === "help" || command[0] === "command"){								/* help */
+		} else if(command[0] === "help" || command[0] === "command" || command[0] === "h"){			/* help */
 			msg.channel.send(box(HELP_STRING,"Commands",84),{split:true});
-		} else if(command[0] === "funny"){															/* funny command (right now its only pictures) */
+		} else if(command[0] === "funny" || command[0] === "f"){									/* funny command (right now its only pictures) */
 			if(command.length !== 2){
 				msg.reply("you did not run this command correctly.");
 			} else if(command[1] === "p" || command[1] === "picture" || command[1] === "pictures" || command[1] === "pics" || command[1] === "pic" || command[1] === "photo" || command[1] === "photos"){
 				fs.readdir("./funnyPics", (err, files) => {
-					msg.channel.send("", {file: "funnyPics/" + randomString(files)});
+					if(files === undefined || files.length === 0){
+						msg.channel.send("Sorry I don't have any funny photos");
+						console.log("I don't have any funny photos :(");
+					} else {
+						msg.channel.send("", {file: "funnyPics/" + randomString(files)});
+					}
 				});
 			}
 		} else if(command[0] === "bal" || command[0] === "b" || command[0] === "balance"){			/* balance command */					
 			msg.reply(`you have ${userDatas[author.id].balance} monies.`);
-		} else if(command[0] === "avatar"){                                                               //show a user's avatar
+		} else if(command[0] === "avatar"){															/* shows a user's avatar */
 	      let otherUser = msg.mentions.users.first();
 	      msg.channel.send("", {file: otherUser.displayAvatarURL.substring(0, otherUser.displayAvatarURL.length - 9)});
 	    }
