@@ -61,8 +61,6 @@ client.on('message', function(msg){
 					}
 				});
 			}
-		} else if(command[0] === "bal" || command[0] === "b" || command[0] === "balance"){			/* balance command */					
-			msg.reply(`you have ${usersData[author.id].balance} monies.`);
 		} else if(command[0] === "avatar"){															/* shows a user's avatar */
 	      let otherUser = msg.mentions.users.first();
 	      msg.channel.send("", {file: otherUser.displayAvatarURL.substring(0, otherUser.displayAvatarURL.length - 9)});

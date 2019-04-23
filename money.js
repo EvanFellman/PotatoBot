@@ -6,10 +6,10 @@ module.exports = class Main{
 	}
 
 	//returns true iff it processes a command.  This will process anything directly involving money.
-	processMessage(msg, command, data){
-		if(command[0] === "hi"){
-			msg.reply("hi");
-			return true;
+	processMessage(msg, command, usersData){
+		const author = msg.author;
+		if(command[0] === "bal" || command[0] === "b" || command[0] === "balance"){			/* balance command */					
+			msg.reply(`you have ${usersData[author.id].balance} monies.`);
 		}
 	}
 }
