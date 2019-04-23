@@ -2,9 +2,9 @@ const Discord = require('discord.js');
 const client = new Discord.Client();
 const fs = require('fs');
 const STARTER = ';';
-let userDatas = {};
+let usersData = {};
 let HELP_STRING = [];
-
+let moneyModule = new (require("./money"))();
 addToHelperString("help", "This will all of the commands you can use");
 addToHelperString("Create Account", "This will initialize your potato account");
 addToHelperString("bal", "Shows your balance");
@@ -40,7 +40,8 @@ client.on('message', function(msg){
 			if(isUserInitialized(author)){
 				msg.reply('you already have a Potato Account.');
 			} else {
-				userDatas[msg.author.id] = {balance: 10};
+				usersData[author.id] = {};
+				moneyModule.init(author,usersData);
 				msg.reply('you now have a Potato Account.');
 			}
 		} else if(!isUserInitialized(author)){
@@ -61,10 +62,12 @@ client.on('message', function(msg){
 				});
 			}
 		} else if(command[0] === "bal" || command[0] === "b" || command[0] === "balance"){			/* balance command */					
-			msg.reply(`you have ${userDatas[author.id].balance} monies.`);
+			msg.reply(`you have ${usersData[author.id].balance} monies.`);
 		} else if(command[0] === "avatar"){															/* shows a user's avatar */
 	      let otherUser = msg.mentions.users.first();
 	      msg.channel.send("", {file: otherUser.displayAvatarURL.substring(0, otherUser.displayAvatarURL.length - 9)});
+	    } else {
+	    	moneyModule.processMessage(msg, command, usersData);
 	    }
 	} 
 });
@@ -131,5 +134,5 @@ function addToHelperString(func, description){
 
 /* returns true iff the user has an account */
 function isUserInitialized(user){
-	return Object.keys(userDatas).includes(user.id);
+	return Object.keys(usersData).includes(user.id);
 }
