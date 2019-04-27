@@ -4,16 +4,22 @@ const fs = require('fs');
 const STARTER = ';';
 let usersData = {};
 let HELP_STRING = [];
-let moneyModule = new (require("./money"))();
+let modules = [];
 addToHelperString("help", "This will all of the commands you can use");
 addToHelperString("Create Account", "This will initialize your potato account");
 addToHelperString("bal", "Shows your balance");
 addToHelperString("funny picture", "Shows a random funny photo");
 addToHelperString("avatar @user", "This will show a person's avatar");
-
 /* read the token from token.txt */
 fs.readFile('token.txt',function(err,txt){
-	client.login(txt.toString());
+	fs.readdir('.',function(error,files){
+		for(var i = 0; i < files.length;i++){
+			if(files[i].substring(files[i].length-3) === '.js' && files[i] !== "bot.js"){  // looks over the files having js and adds them in an module object
+				modules.push(new (require("./" + files[i]))());
+			}
+		}
+		client.login(txt.toString());
+	});
 });
 
 /* when it logs on run this */
@@ -30,7 +36,7 @@ client.on('message', function(msg){
 		const author = msg.author;
 		let i = 0;
 		while(i < command.length){
-			if(command[i] === " "){
+			if(command[i] === ""){
 				command.splice(i, 1);
 			} else {
 				i++;
@@ -41,7 +47,9 @@ client.on('message', function(msg){
 				msg.reply('you already have a Potato Account.');
 			} else {
 				usersData[author.id] = {};
-				moneyModule.init(author,usersData);
+				modules.forEach(function(elem){
+					elem.init(author, usersData);
+				});
 				msg.reply('you now have a Potato Account.');
 			}
 		} else if(!isUserInitialized(author)){
@@ -65,11 +73,13 @@ client.on('message', function(msg){
 	      let otherUser = msg.mentions.users.first();
 	      msg.channel.send("", {file: otherUser.displayAvatarURL.substring(0, otherUser.displayAvatarURL.length - 9)});
 	    } else {
-	    	moneyModule.processMessage(msg, command, usersData);
+	    	modules.forEach(function(elem){
+	    		elem.processMessage(msg,command,usersData);
+	    	});
+	    	
 	    }
 	} 
 });
-
 
 /* returns a random string from the input (an array of strings) */
 function randomString(stringArray){
