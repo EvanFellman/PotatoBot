@@ -5,20 +5,24 @@ const STARTER = ';';
 let usersData = {};
 let HELP_STRING = [];
 let modules = [];
+const slModule = new (require("./saveandload.js"))();
 addToHelperString("help", "This will all of the commands you can use");
 addToHelperString("Create Account", "This will initialize your potato account");
 addToHelperString("bal", "Shows your balance");
 addToHelperString("funny picture", "Shows a random funny photo");
 addToHelperString("avatar @user", "This will show a person's avatar");
 /* read the token from token.txt */
-fs.readFile('token.txt',function(err,txt){
-	fs.readdir('.',function(error,files){
-		for(var i = 0; i < files.length;i++){
-			if(files[i].substring(files[i].length-3) === '.js' && files[i] !== "bot.js"){  // looks over the files having js and adds them in an module object
-				modules.push(new (require("./" + files[i]))());
+fs.readFile('token.txt', function(err,txt){
+	fs.readdir('.', function(error,files){
+		slModule.load(function(data){
+			usersData = data;
+			for(var i = 0; i < files.length;i++){
+				if(files[i].substring(files[i].length-3) === '.js' && files[i] !== "bot.js"){  // looks over the files having js and adds them in modules
+					modules.push(new (require("./" + files[i]))());
+				}
 			}
-		}
-		client.login(txt.toString());
+			client.login(txt.toString());
+		});
 	});
 });
 
@@ -50,6 +54,7 @@ client.on('message', function(msg){
 				modules.forEach(function(elem){
 					elem.init(author, usersData);
 				});
+				slModule.save(usersData);
 				msg.reply('you now have a Potato Account.');
 			}
 		} else if(!isUserInitialized(author)){
