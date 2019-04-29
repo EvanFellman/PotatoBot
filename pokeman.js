@@ -105,14 +105,17 @@ class Pokeman{
 		this.uniqueStats = {healthStat: Math.round(Math.random() * 100), attackStat: Math.round(Math.random() * 100), defenseStat: Math.round(Math.random() * 100), speedStat: Math.round(Math.random() * 100)};
 	}
 
+	//Move[] getMoves()
 	getMoves(){
 		return this.moves;
 	}
 
+	//Move getMoveByIndex(i: natural)
 	getMoveByIndex(i){
 		return this.moves[i];
 	}
 
+	//Move getMoveByName(name: String)
 	getMoveByName(name){
 		for(let i = 0; i < this.moves.length; i++){
 			if(this.moves[i].name === name){
@@ -122,6 +125,8 @@ class Pokeman{
 		return null;
 	}
 
+	//This deals also deals damage to the other pokeman
+	//String attack(otherMonster: Pokeman, moveIndex: natural)
 	attack(otherMonster, moveIndex){
 		let a = this.moves[moveIndex].attack(this, otherMonster);
 		a.damage *= (this.baseStats.attackStat + this.uniqueStats.attackStat) / 200;
@@ -139,6 +144,7 @@ class StatusEffect{
 		this.attackFunc = attackFunc;
 	}
 
+	//{damage: number, active: boolean} tick(thisMonster: Pokeman)
 	tick(thisMonster){
 		let a = this.attackFunc(thisMonster);
 		a.damage *= this.type.isStrongTo(thisMonster) ? 2 : 1;
