@@ -80,7 +80,12 @@ class Move{
 				a.damage *= 0.5;
 				a.description += ` ${this.name} is not very effective.`;
 			}
-			a.description += ` ${a.myStatusEffect.description} ${a.theirStatusEffect.description}`;
+			if(a.myStatusEffect !== null){
+				a.description += ` ${thisMonster.name} is ${a.myStatusEffect.description}.`;
+			}
+			if(a.theirStatusEffect !== null){
+				a.description += ` ${otherMonster.name} is ${a.theirStatusEffect.description}.`;
+			}
 			return a;
 		} else {
 			return {damage: 0, myStatusEffect: null, theirStatusEffect: null, description: `${this.name} missed!`};
@@ -96,7 +101,7 @@ class Pokeman{
 		this.moves = moves;
 		this.xp = 0;
 		this.baseStats = baseStats;
-		this.status = null;
+		this.status = null;  //StatusEffect
 		this.uniqueStats = {healthStat: Math.round(Math.random() * 100), attackStat: Math.round(Math.random() * 100), defenseStat: Math.round(Math.random() * 100), speedStat: Math.round(Math.random() * 100)};
 	}
 
@@ -123,5 +128,21 @@ class Pokeman{
 		a.damage *= (200 + (200 - (otherMonster.baseStats.defenseStat + otherMonster.uniqueStats.defenseStat))) / 400;
 		otherMonster.healthStat -= a.damage;
 		return `${this.name} used ${this.moves[moveIndex].name}!` + a.description;
+	}
+}
+
+class StatusEffect{
+	//void constructor(name: String, description: String, attackFunc: function(thisMonster) => {damage: number, active: boolean} , type: Type)
+	constructor(name, description, attackFunc, type){
+		this.name = name;
+		this.description = description;
+		this.attackFunc = attackFunc;
+	}
+
+	tick(thisMonster){
+		let a = this.attackFunc(thisMonster);
+		a.damage *= this.type.isStrongTo(thisMonster) ? 2 : 1;
+		a.damage *= this.type.isWeakTo(thisMonster) ? 0.5 : 1;
+		return a;
 	}
 }
