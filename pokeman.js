@@ -217,7 +217,7 @@ class StatusEffect{
 	tick(thisMonster){
 		if(this.freeFunc()){
 			this.inEffect = false;
-			return ` ${thisMonster.name} is not longer ${this.description}!`;
+			return ` ${thisMonster.name} is no longer ${this.description}!`;
 		} else {
 			let damage = this.attackFunc(thisMonster);
 			damage *= this.type.isStrongTo(thisMonster.type) ? 2 : 1;
