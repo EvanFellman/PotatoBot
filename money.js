@@ -12,4 +12,16 @@ module.exports = class Main{
 			msg.reply(`you have ${usersData[author.id].balance} monies.`);
 		}
 	}
+
+	getBalance(usersData, user){
+		return usersData[user.id].balance;
+	}
+
+	setBalance(usersData, user, amount){
+		usersData[user.id] = amount;
+	}
+
+	increaseBalance(usersData, user, amount){
+		usersData[user.id] += amount;
+	}
 }
