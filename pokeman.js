@@ -1,4 +1,5 @@
 const moneyModule = new (require("./money.js"))();
+const slModule = new (require("./saveandload.js"))();
 const POKEBALL_PRICE = 25;
 let types = {};
 let moves = {};
@@ -23,6 +24,7 @@ module.exports = class Main{
 				moneyModule.increaseBalance(usersData, author, (-1) * POKEBALL_PRICE * amountToBuy);
 				this.increaseBalls(usersData, author, amountToBuy);
 				msg.channel.send(`<@${author.id}> has purchased ${amountToBuy} pokeballs for ${POKEBALL_PRICE * amountToBuy} monies.`);
+				slModule.save(usersData);
 			}
 		} else if(command.length === 2 && (command[0] === "balls" || command[0] === "ball" || command[0] === "b" || command[0] === "pokeball" || command[0] === "pokeballs" || command[0] === "p")
 				&& (command[1] === "price" || command[1] === "p")){
@@ -36,10 +38,12 @@ module.exports = class Main{
 
 	setBalls(usersData, user, amount){
 		usersData[user.id] = amount;
+		slModule.save(usersData);
 	}
 
 	increaseBalls(usersData, user, amount){
 		usersData[user.id] += amount;
+		slModule.save(usersData);
 	}
 }
 

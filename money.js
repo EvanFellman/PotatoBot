@@ -1,3 +1,4 @@
+const slModule = new (require("./saveandload.js"))();
 module.exports = class Main{
 
 	//initializes user
@@ -19,9 +20,12 @@ module.exports = class Main{
 
 	setBalance(usersData, user, amount){
 		usersData[user.id] = amount;
+		slModule.save(usersData);
+
 	}
 
 	increaseBalance(usersData, user, amount){
 		usersData[user.id] += amount;
+		slModule.save(usersData);
 	}
 }
