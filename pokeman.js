@@ -80,9 +80,48 @@ class Move{
 				a.damage *= 0.5;
 				a.description += ` ${this.name} is not very effective.`;
 			}
+			a.description += ` ${a.myStatusEffect.description} ${a.theirStatusEffect.description}`;
 			return a;
 		} else {
 			return {damage: 0, myStatusEffect: null, theirStatusEffect: null, description: `${this.name} missed!`};
 		}
+	}
+}
+
+class Pokeman{
+	//void constructor(name: String, type: Type, moves: Move[], baseStats: {healthStat: number, attackStat: number, defenseStat: number, speedStat: number})
+	constructor(name, type, moves, baseStats){
+		this.name = name;
+		this.type = type;
+		this.moves = moves;
+		this.xp = 0;
+		this.baseStats = baseStats;
+		this.status = null;
+		this.uniqueStats = {healthStat: Math.round(Math.random() * 100), attackStat: Math.round(Math.random() * 100), defenseStat: Math.round(Math.random() * 100), speedStat: Math.round(Math.random() * 100)};
+	}
+
+	getMoves(){
+		return this.moves;
+	}
+
+	getMoveByIndex(i){
+		return this.moves[i];
+	}
+
+	getMoveByName(name){
+		for(let i = 0; i < this.moves.length; i++){
+			if(this.moves[i].name === name){
+				return this.moves[i];
+			}
+		}
+		return null;
+	}
+
+	attack(otherMonster, moveIndex){
+		let a = this.moves[moveIndex].attack(this, otherMonster);
+		a.damage *= (this.baseStats.attackStat + this.uniqueStats.attackStat) / 200;
+		a.damage *= (200 + (200 - (otherMonster.baseStats.defenseStat + otherMonster.uniqueStats.defenseStat))) / 400;
+		otherMonster.healthStat -= a.damage;
+		return `${this.name} used ${this.moves[moveIndex].name}!` + a.description;
 	}
 }
