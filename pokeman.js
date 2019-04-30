@@ -36,7 +36,18 @@ module.exports = class Main{
 				msg.reply(`you have ${this.getBalls(usersData, author)} pokeballs.`);
 			}
 		} else if(command.length >= 2 && (command[0] === "pokebattle" || command[0] === "pokemanbattle" || command[0] === "pokemonbattle" || command[0] === "pb")){
-			if(command.length == 2 && (command[1] === "starter" || command[1] === "s")){
+			if(command.length == 2 && (command[1] === "list" || command[1] === "l")){
+				const a = this.getPokemans(usersData, author);
+				let out = "";
+				for(let i = 0; i < a.length; i++){
+					out += `\n${i+1}. ${a[i].getName()}`;
+				}
+				msg.channel.send(out.substring(1));
+			} else if(command.length == 3 && (command[1] === "pokedex" || command[1] === "info" || command[1] === "i")){
+				if(!isNaN(command[2])){
+					msg.channel.send(this.getPokeman(usersData, author, parseInt(command[2]) - 1).info(true, true), {split: true});
+				} 
+			} else if(command.length == 2 && (command[1] === "starter" || command[1] === "s")){
 				if(this.getPokemans(usersData, author).length > 0){
 					msg.reply(`you already have a pokeman`);
 				} else if(moneyModule.getBalance(usersData, author) < STARTER_PRICE){
@@ -52,8 +63,9 @@ module.exports = class Main{
 					games[msg.channel.id] = {};
 				}
 				const userPokeman = this.getPokemans(usersData, author)[parseInt(command[2]) - 1];
+				userPokeman.owner = author.username;
 				let wildPokeman = Object.values(pokemans);
-				wildPokeman = wildPokeman[Math.floor(Math.random() * wildPokeman.length)](Math.max(1, userPokeman.level + (3 * ((Math.random() * 2) - 1))));
+				wildPokeman = wildPokeman[Math.floor(Math.random() * wildPokeman.length)](Math.max(1, userPokeman.level + Math.floor(3 * ((Math.random() * 2) - 1))), 0, undefined, "Wild");
 				//Store games in games object
 				//	Each game is saved under its channel and under both of the users' ids.
 				//	When making a two player pokeman battle, make one reference the other (example: games[msg.channel][author.id] = games[msg.channel][otherPlayer.id]; )
@@ -61,19 +73,58 @@ module.exports = class Main{
 				//wildBattle: bool, userPokeman: Pokeman, wildPokeman: Pokeman, bet: float
 				games[msg.channel.id][author.id] = {wildBattle: true, userPokeman: userPokeman, wildPokeman: wildPokeman, bet: Math.abs(parseInt(command[3]))};
 				let thisGame = games[msg.channel.id][author.id];
-				console.log(userPokeman);
-				console.log(userPokeman.getName());
-				let out = `${thisGame.userPokeman.getName()} is battling ${thisGame.wildPokeman.getName()} for ${thisGame.bet} monies.\n`;
+				let out = `${thisGame.userPokeman.getName()} is battling a level ${thisGame.wildPokeman.level} ${thisGame.wildPokeman.getName()} for ${thisGame.bet} monies.\n`;
 				thisGame.userPokeman.resetPokeman();
 				thisGame.wildPokeman.resetPokeman();
+				
 				if(thisGame.userPokeman.baseStats.speedStat + thisGame.userPokeman.uniqueStats.speedStat > thisGame.wildPokeman.baseStats.speedStat + thisGame.wildPokeman.uniqueStats.speedStat){
 					//If this is true then user goes first
-					out += `You go first!\n${thisGame.userPokeman.getName()}'s health:\n${thisGame.userPokeman.printHealthBar()}`;
-					out += `\n\n Wild ${thisGame.wildPokeman.getName()}'s health:\n${thisGame.wildPokeman.printHealthBar()}`;
 				} else {
 					//Otherwise wild pokeman goes first
+					out += `${thisGame.wildPokeman.attack(userPokeman, Math.floor(Math.random() * thisGame.wildPokeman.moves.length))}\n`;
+
 				}
+				out += `${thisGame.userPokeman.getName()}'s health:\n${thisGame.userPokeman.printHealthBar()}`;
+				out += `\n\n ${thisGame.wildPokeman.getName()}'s health:\n${thisGame.wildPokeman.printHealthBar()}`;
+				out += `\nUse \`attack <move number>\` to use a move`;
+				out += `${thisGame.userPokeman.printMoves()}`;
 				msg.channel.send(out, {split: true});
+			} else if(command.length === 3 && (command[1] === "attack" || command[1] === "a")){
+				if(games[msg.channel.id] && games[msg.channel.id][author.id] && games[msg.channel.id][author.id].wildBattle){
+					const thisGame = games[msg.channel.id][author.id];
+					const userPokeman = thisGame.userPokeman;
+					const wildPokeman = thisGame.wildPokeman;
+					let out = "";
+					if(userPokeman.health <= 0){
+						out += `${userPokeman.getName()} fainted. You lost ${thisGame.bet} monies.`;
+						moneyModule.increaseBalance(usersData, author, (-1) * thisGame.bet);
+						delete games[msg.channel.id][author.id];
+					} else {
+						out += `${userPokeman.attack(wildPokeman, parseInt(command[2]) - 1)}\n`;
+						out += `${thisGame.userPokeman.getName()}'s health:\n${thisGame.userPokeman.printHealthBar()}`;
+						out += `\n\n ${thisGame.wildPokeman.getName()}'s health:\n${thisGame.wildPokeman.printHealthBar()}\n\n`;
+						if(wildPokeman.health <= 0){
+							out += `${wildPokeman.getName()} fainted. You won ${thisGame.bet} monies.`;
+							moneyModule.increaseBalance(usersData, author, thisGame.bet);
+							userPokeman.increaseXP(wildPokeman.level);
+							delete games[msg.channel.id][author.id];
+							this.savePokeman(usersData, author, userPokeman);
+						} else {
+							out += `${wildPokeman.attack(userPokeman, Math.floor(Math.random() * thisGame.wildPokeman.moves.length))}\n`;
+							out += `${thisGame.userPokeman.getName()}'s health:\n${thisGame.userPokeman.printHealthBar()}`;
+							out += `\n\n ${thisGame.wildPokeman.getName()}'s health:\n${thisGame.wildPokeman.printHealthBar()}`;
+							if(userPokeman.health <= 0){
+								out += `\n${userPokeman.getName()} fainted. You lost ${thisGame.bet} monies.`;
+								moneyModule.increaseBalance(usersData, author, (-1) * thisGame.bet);
+								delete games[msg.channel.id][author.id];
+							} else {
+								out += `\nUse \`attack <move number>\` to use a move`;
+								out += `${thisGame.userPokeman.printMoves()}`;
+							}
+						}
+					}
+					msg.channel.send(out, {split: true});
+				}
 			}
 		}
 	}
@@ -93,18 +144,31 @@ module.exports = class Main{
 	}
 
 	getPokemans(usersData, user){
-		console.log(usersData[user.id].pokemans);
 		let out = [];
 		for(let i = 0; i < usersData[user.id].pokemans.length; i++){
 			out.push(pokemans[usersData[user.id].pokemans[i][0]](usersData[user.id].pokemans[i][1], usersData[user.id].pokemans[i][2], usersData[user.id].pokemans[i][3]));
 		}
-		console.log(out);
 		return out;
+	}
+
+	getPokeman(usersData, user, index){
+		return pokemans[usersData[user.id].pokemans[index][0]](usersData[user.id].pokemans[index][1], usersData[user.id].pokemans[index][2], usersData[user.id].pokemans[index][3]);
 	}
 
 	addPokeman(usersData, user, poke){
 		usersData[user.id].pokemans.push([poke.name, poke.level, poke.xp, poke.uniqueStats]);
 		slModule.save(usersData);
+	}
+
+	savePokeman(usersData, user, poke){
+		for(let i = 0; i < usersData[user.id].pokemans.length; i++){
+			const p = usersData[user.id].pokemans[i];
+			if(p[0] === poke.name && p[3].attackStat === poke.uniqueStats.attackStat && p[3].defenseStat === poke.uniqueStats.defenseStat && p[3].speedStat === poke.uniqueStats.speedStat && p[3].healthStat === poke.uniqueStats.healthStat){
+				usersData[user.id].pokemans[i] = [poke.name, poke.level, poke.xp, poke.uniqueStats];
+				slModule.save(usersData);
+				return;
+			}
+		}
 	}
 }
 
@@ -117,7 +181,7 @@ class Type{
 		this.name = name;
 		this.weaknesses = {};
 		for(let i = 0; i < weaknesses.length; i++){
-			this.weaknesses[weaknesses] = true;
+			this.weaknesses[weaknesses[i]] = true;
 		}
 	}
 
@@ -187,6 +251,14 @@ class Pokeman{
 		this.resetPokeman();
 	}
 
+	increaseXP(x){
+		this.xp += x;
+		while(this.xp >= Math.pow(this.level, 2)){
+			this.xp -= Math.pow(this.level,2);
+			this.level++;
+		}
+	}
+
 	//natural calcMaxHealth() returns maxHealth
 	calcMaxHealth(){
 		return Math.round(((150 + this.uniqueStats.healthStat) / 200) * this.baseStats.healthStat * this.level / 3);
@@ -233,7 +305,7 @@ class Pokeman{
 	printMoves(){
 		let a = [];
 		for(let i = 1; i <= this.moves.length; i++){
-			a += `${i} --- ${this.moves[i].name} - ${this.moves[i].type.name}`;
+			a.push(`${i} --- ${this.moves[i - 1].name} - ${this.moves[i - 1].type.name}`);
 		}
 		return box(a);
 	}
@@ -251,6 +323,8 @@ class Pokeman{
 	getName(){
 		if(this.owner === ""){
 			return this.name;
+		} else if(this.owner === "Wild"){
+			return `Wild ${this.name}`;
 		} else {
 			return `${this.owner}'s ${this.name}`;
 		}
@@ -264,16 +338,16 @@ class Pokeman{
 		} else {
 			let a = this.moves[moveIndex].attack(this, otherMonster);
 			a.damage *= ((this.baseStats.attackStat + this.uniqueStats.attackStat) / 200) * Math.round(this.level * 0.5);
-			a.damage *= Math.round((200 + (200 - (otherMonster.baseStats.defenseStat + otherMonster.uniqueStats.defenseStat))) / (400 * Math.round(otherMonster.level)));
+			a.damage *= Math.round((200 + (200 - (otherMonster.baseStats.defenseStat + otherMonster.uniqueStats.defenseStat))) / (400 * Math.round(otherMonster.level) / 3));
 			otherMonster.health -= a.damage;
 			let description = "";
 			if(a.myStatusEffect !== null){
 				this.status = a.myStatusEffect;
-				description += ` ${this.name} now is ${this.status.name}.`;
+				description += ` ${this.name} now is ${this.status.description}.`;
 			}
 			if(a.theirStatusEffect !== null){
 				otherMonster.status = a.theirStatusEffect;
-				description += ` ${otherMonster.getName()} now is ${this.status.name}.`;
+				description += ` ${otherMonster.getName()} now is ${otherMonster.status.description}.`;
 			}
 			let statusString = "";
 			if(this.status !== null){
@@ -282,16 +356,25 @@ class Pokeman{
 					this.status = null;
 				}
 			}
-			return `${description}${this.getName()} used ${this.moves[moveIndex].name}! ${a.description}${statusString}`;
+			return `${description}${this.getName()} used ${this.moves[moveIndex].name}! ${a.description} ${statusString}`;
 		}
 	}
 
 	//String info(showLevel: boolean, showUniqueStats: boolean)
 	info(showLevel=false, showUniqueStats=false){
-		let a = [`=--- Type`,`- ${this.type.name}`,``, `=--- Weak To Moves Of Type`, `- ${this.type.weakness.name}`, ``,
+		let a = [`=--- Type`,`- ${this.type.name}`,``, `=--- Weak To Moves Of Types`];
+		const asdf = Object.keys(this.type.weaknesses);
+		for(let i = 0; i < asdf.length; i ++){
+			a.push(`- ${asdf[i]}`);
+		}
+
+		a = a.concat(``,
 			`=--- Base Stats`,`- attack -- ${this.baseStats.attackStat}`, ``, `- defense -- ${this.baseStats.defenseStat}`, ``, 
-			`- speed -- ${this.baseStats.speedStat}`, ``, `- health -- ${this.baseStats.healthStat}`];
+			`- speed -- ${this.baseStats.speedStat}`, ``, `- health -- ${this.baseStats.healthStat}`);
 		if(showLevel){
+			a.unshift(``);
+			a.unshift(`- ${this.xp} xp`);
+			a.unshift(`=--- XP`);
 			a.unshift(``);
 			a.unshift(`- lvl ${this.level}`);
 			a.unshift(`=--- Level`);
@@ -321,6 +404,7 @@ class StatusEffect{
 		this.active = active
 		this.inEffect = true;
 		this.freeFunc = freeFunc;			//function to determine if status is lifted
+		this.type = type;
 	}
 
 	//String tick(thisMonster: Pokeman)
@@ -392,17 +476,17 @@ types["fire"] = new Type("fire", ["water","rock"]);
 types["water"] = new Type("water", ["grass"]);
 types["grass"] = new Type("grass", ["fire"]);
 types["toxic"] = new Type("toxic", ["fire"]);
-types["rock"] = new Type("rock", ["toxic"])
+types["rock"] = new Type("rock", ["toxic"]);
 
 //						  new Move(moveName: String, accuracy: natural, type: Type, attackFunction(thisMonster, thierMonster) => {damage: natural, myStatusEffect: StatusEffect, theirStatusEffect: StatusEffect});
 moves["Burn Baby Burn"] = new Move("Burn Baby Burn", 65, types["fire"], (a, b) => {return {damage: Math.round(25 + (Math.random() * 25)), myStatusEffect: null, theirStatusEffect: null }});
-moves["Poison"] = new Move("Poison", 75, types["toxic"], (a, b) => {return {damage: 0, myStatusEffect: null, theirStatusEffect: statusEffects["poison"]}});
+moves["Poison"] = new Move("Poison", 75, types["toxic"], (a, b) => {return {damage: 0, myStatusEffect: null, theirStatusEffect: statusEffects["poison"]()}});
 
 //					   (level: nat, xp: nat, stats: Stats, owner: String) => new Pokeman(pokemanName: String, type: Type, moves: Move[], baseStats: Stats, level: nat, xp: nat, stats: Stats, owner: String);
-pokemans["YAH YEET"] = (level, xp, stats, owner) => new Pokeman("YAH YEET", types["fire"], [moves["Burn Baby Burn"]], new Stats(300, 50, 50, 60), level, xp, stats, owner);
+pokemans["YAH YEET"] = (level, xp, stats, owner) => new Pokeman("YAH YEET", types["fire"], [moves["Burn Baby Burn"], moves["Poison"]], new Stats(300, 50, 50, 60), level, xp, stats, owner);
 
 //						  () => new StatusEffect(name: String, desc: String, type: Type, active: boolean, attackFunc(thisM: Pokeman) => number, freeFunc(thisM: Pokeman) => boolean);
-statusEffects["poison"] = () => new StatusEffect("poison", "poisoned", types["toxic"], true, (thisM) => thisM.calcMaxHealth / 16, (thisM) => Math.random() * (thisM.baseStats.speedStat + thisM.uniqueStats.speedStat) < 50);
+statusEffects["poison"] = () => new StatusEffect("poison", "poisoned", types["toxic"], true, (thisM) => thisM.calcMaxHealth() / 8, (thisM) => (Math.random() * (500 - (thisM.baseStats.speedStat + thisM.uniqueStats.speedStat)) < 50));
 
 
 let a = pokemans["YAH YEET"](1, 0, null,"Yooooo");
