@@ -6,6 +6,7 @@ const STARTERS = ["YAH YEET"];
 let types = {};
 let moves = {};
 let pokemans = {};
+let statusEffects = {};
 module.exports = class Main{
 	//initializes user
 	init(user, data){
@@ -82,9 +83,12 @@ module.exports = class Main{
 
 class Type{
 	//void constructor(name: string, weakness: Type)
-	constructor(name, weakness){
+	constructor(name, weaknesses){
 		this.name = name;
-		this.weakness = weakness;
+		this.weaknesses = {};
+		for(let i = 0; i < weaknesses.length; i++){
+			this.weaknesses[weaknesses] = true;
+		}
 	}
 
 	equals(otherType){
@@ -92,11 +96,11 @@ class Type{
 	}
 
 	isStrongTo(otherType){
-		otherType.weakness.equals(this);
+		return otherType.weaknesses[this.name] ? true : false;
 	}
 
 	isWeakTo(otherType){
-		this.weakness.equals(otherType);
+		return this.weaknesses[otherType.name] ? true : false;
 	}
 }
 
@@ -336,15 +340,21 @@ function box(stringArray, title="", width=0){      //creates a box of text
   }
   return out + "|`";
 }
+//				new Type(typeName: String, weakness: String[]);
+types["fire"] = new Type("fire", ["water","rock"]);
+types["water"] = new Type("water", ["grass"]);
+types["grass"] = new Type("grass", ["fire"]);
+types["toxic"] = new Type("toxic", ["fire"]);
+types["rock"] = new Type("rock", ["toxic"])
 
-types["fire"] = new Type("fire", new Type("water", null));
-types["water"] = new Type("water", new Type("grass", null));
-types["grass"] = new Type("grass", new Type("fire", null));
-
+//						  new Move(moveName: String, accuracy: natural, type: Type, attackFunction(thisMonster, thierMonster) => {damage: natural, myStatusEffect: StatusEffect, theirStatusEffect: StatusEffect});
 moves["Burn Baby Burn"] = new Move("Burn Baby Burn", 65, types["fire"], (a, b) => {return {damage: Math.round(25 + (Math.random() * 25)), myStatusEffect: null, theirStatusEffect: null }});
 
+//					   (level: nat, xp: nat, stats: Stats, owner: String) => new Pokeman(pokemanName: String, type: Type, moves: Move[], baseStats: Stats, level: nat, xp: nat, stats: Stats, owner: String);
 pokemans["YAH YEET"] = (level, xp, stats, owner) => new Pokeman("YAH YEET", types["fire"], [moves["Burn Baby Burn"]], {healthStat: 300, attackStat: 50, defenseStat: 50, speedStat: 60}, level, xp, stats, owner);
 
+
+statusEffects["poisoned"]
 let a = pokemans["YAH YEET"](1, 0, null,"Yooooo");
 let b = pokemans["YAH YEET"]();
 // console.log(a.attack(b, 0));
