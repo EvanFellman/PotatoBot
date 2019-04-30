@@ -1,1 +1,1 @@
-{"478101432671797248":{"balance":10}}
+{"277517613389709313":{"balance":925,"pokemans":[["YAH YEET",1,0,{"healthStat":44,"attackStat":90,"defenseStat":7,"speedStat":44}]],"pokeBalls":1}}
