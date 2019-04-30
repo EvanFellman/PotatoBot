@@ -155,7 +155,7 @@ class Pokeman{
 
 	//natural calcMaxHealth() returns maxHealth
 	calcMaxHealth(){
-		return Math.round(((150 + this.uniqueStats.healthStat) / 200) * this.baseStats.healthStat );//* this.level / 3);
+		return Math.round(((150 + this.uniqueStats.healthStat) / 200) * this.baseStats.healthStat * this.level / 3);
 	}
 
 	//sets health to full and resets status
@@ -349,4 +349,4 @@ let a = pokemans["YAH YEET"](1, 0, null,"Yooooo");
 let b = pokemans["YAH YEET"]();
 // console.log(a.attack(b, 0));
 // console.log(b.printHealthBar());
-// console.log(a.info(true, true))
+// console.log(a.info(true, true));
