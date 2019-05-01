@@ -1,1 +1,1 @@
-{"277517613389709313":{"balance":839,"pokemans":[["YAH YEET",2,3,{"healthStat":93,"attackStat":80,"defenseStat":56,"speedStat":55}]],"pokeBalls":5}}
+{"277517613389709313":{"balance":839,"pokemans":[["YAH YEET",2,3,{"healthStat":93,"attackStat":80,"defenseStat":56,"speedStat":55}]],"pokeBalls":5},"478101432671797248":{"balance":10,"pokemans":[],"pokeBalls":0}}

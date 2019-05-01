@@ -11,6 +11,15 @@ addToHelperString("Create Account", "This will initialize your potato account");
 addToHelperString("bal", "Shows your balance");
 addToHelperString("funny picture", "Shows a random funny photo");
 addToHelperString("avatar @user", "This will show a person's avatar");
+
+//pokeman helperstring
+addToHelperString("buy pokeballs <amount>", "This will buy <amount> pokeballs");
+addToHelperString("pokeballs price", "This will show the price of a pokeball");
+addToHelperString("pokebattle list", "This will list all of the pokemans you have");
+addToHelperString("pokebattle info <pokeNumber or name>", "This will show information about either the pokeman of <pokeNumber> or about <name>");
+addToHelperString("pokebattle starter", "This will give you a starter pokeman");
+addToHelperString("pokebattle wildbattle <pokeNumber> <monies>", "Starts a battle against a wild pokeman with bet of <monies> monies and <pokeNumber> pokeman");
+addToHelperString("pokebattle attack <moveNumber>", "Your pokeman will use <moveNumber> move");
 /* read the token from token.txt */
 fs.readFile('token.txt', function(err,txt){
 	fs.readdir('.', function(error,files){

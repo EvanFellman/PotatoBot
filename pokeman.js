@@ -86,7 +86,7 @@ module.exports = class Main{
 				}
 				out += `${thisGame.userPokeman.getName()}'s health:\n${thisGame.userPokeman.printHealthBar()}`;
 				out += `\n\n ${thisGame.wildPokeman.getName()}'s health:\n${thisGame.wildPokeman.printHealthBar()}`;
-				out += `\nUse \`attack <move number>\` to use a move`;
+				out += `\nUse \`pokebattle attack <move number>\` to use a move`;
 				out += `${thisGame.userPokeman.printMoves()}`;
 				msg.channel.send(out, {split: true});
 			} else if(command.length === 3 && (command[1] === "attack" || command[1] === "a")){
@@ -102,7 +102,7 @@ module.exports = class Main{
 					} else {
 						out += `${userPokeman.attack(wildPokeman, parseInt(command[2]) - 1)}\n`;
 						out += `${thisGame.userPokeman.getName()}'s health:\n${thisGame.userPokeman.printHealthBar()}`;
-						out += `\n\n ${thisGame.wildPokeman.getName()}'s health:\n${thisGame.wildPokeman.printHealthBar()}\n\n`;
+						out += `\n\n ${thisGame.wildPokeman.getName()}'s health:\n${thisGame.wildPokeman.printHealthBar()}\n\n\n\n`;
 						if(wildPokeman.health <= 0){
 							out += `${wildPokeman.getName()} fainted. You won ${thisGame.bet} monies.`;
 							moneyModule.increaseBalance(usersData, author, thisGame.bet);
@@ -118,7 +118,7 @@ module.exports = class Main{
 								moneyModule.increaseBalance(usersData, author, (-1) * thisGame.bet);
 								delete games[msg.channel.id][author.id];
 							} else {
-								out += `\nUse \`attack <move number>\` to use a move`;
+								out += `\nUse \`pokebattle attack <move number>\` to use a move`;
 								out += `${thisGame.userPokeman.printMoves()}`;
 							}
 						}
