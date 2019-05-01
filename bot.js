@@ -31,6 +31,7 @@ fs.readFile('token.txt', function(err,txt){
 					modules.push(new (require("./" + files[i]))());
 				}
 			}
+			console.log("Logging in...");
 			client.login(txt.toString());
 		});
 	});
