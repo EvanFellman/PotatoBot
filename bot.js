@@ -20,6 +20,7 @@ addToHelperString("pokebattle info <pokeNumber or name>", "This will show inform
 addToHelperString("pokebattle starter", "This will give you a starter pokeman");
 addToHelperString("pokebattle wildbattle <pokeNumber> <monies>", "Starts a battle against a wild pokeman with bet of <monies> monies and <pokeNumber> pokeman");
 addToHelperString("pokebattle attack <moveNumber>", "Your pokeman will use <moveNumber> move");
+addToHelperString("pokebattle throwball", "Throw a pokeball to try to catch a pokeman");
 /* read the token from token.txt */
 fs.readFile('token.txt', function(err,txt){
 	fs.readdir('.', function(error,files){
