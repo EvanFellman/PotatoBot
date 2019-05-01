@@ -40,7 +40,7 @@ module.exports = class Main{
 				const a = this.getPokemans(usersData, author);
 				let out = "";
 				for(let i = 0; i < a.length; i++){
-					out += `\n${i+1}. ${a[i].getName()}`;
+					out += `\n${i+1}. ${a[i].getName()}\t\tlvl${a[i].level}`;
 				}
 				msg.channel.send(out.substring(1));
 			} else if(command.length == 3 && (command[1] === "pokedex" || command[1] === "info" || command[1] === "i")){
@@ -124,6 +124,20 @@ module.exports = class Main{
 						}
 					}
 					msg.channel.send(out, {split: true});
+				}
+			} else if(command.length === 2 && (command[1] === "throwball" || command[1] === "throw" || command[1] === "t") && games[msg.channel.id] && games[msg.channel.id][author.id] && games[msg.channel.id][author.id].wildBattle){
+				if(this.getBalls(usersData, author) > 0){
+					const wildPoke = games[msg.channel.id][author.id].wildPokeman;
+					this.increaseBalls(usersData, author, -1);
+					if(Math.random() <= wildPoke.health / (1.1 * wildPoke.calcMaxHealth())){
+						//you caught it
+						wildPoke.xp = 0;
+						wildPoke.level = 1;
+						this.addPokeman(usersData, author, wildPoke);
+						msg.channel.send(`You caught a ${wildPoke.getName()}!`);
+					} else {
+						msg.channel.send(`It escaped!`);
+					}
 				}
 			}
 		}
