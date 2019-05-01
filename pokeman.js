@@ -43,10 +43,34 @@ module.exports = class Main{
 					out += `\n${i+1}. ${a[i].getName()}\t\tlvl${a[i].level}`;
 				}
 				msg.channel.send(out.substring(1));
-			} else if(command.length == 3 && (command[1] === "pokedex" || command[1] === "info" || command[1] === "i")){
+			} else if((command[1] === "pokedex" || command[1] === "info" || command[1] === "i")){
 				if(!isNaN(command[2])){
 					msg.channel.send(this.getPokeman(usersData, author, parseInt(command[2]) - 1).info(true, true), {split: true});
-				} 
+				} else {
+					let name = ""
+					for(let i = 2; i < command.length; i++){
+						name += " " + command[i];
+					}
+					name = name.substring(1);
+					let pokemansnames = Object.keys(pokemans);
+					for(let i = 0; i < pokemansnames.length; i++){
+						if(pokemansnames[i].toLowerCase() === name){
+							msg.channel.send(Object.values(pokemans)[i]().info());
+						}
+					}
+					let typenames = Object.keys(types);
+					for(let i = 0; i < typenames.length; i++){
+						if(typenames[i].toLowerCase() === name){
+							msg.channel.send(Object.values(types)[i].info());
+						}
+					}
+					let movenames = Object.keys(moves);
+					for(let i = 0; i < movenames.length; i++){
+						if(movenames[i].toLowerCase() === name){
+							msg.channel.send(Object.values(moves)[i].info());
+						}
+					}
+				}
 			} else if(command.length == 2 && (command[1] === "starter" || command[1] === "s")){
 				if(this.getPokemans(usersData, author).length > 0){
 					msg.reply(`you already have a pokeman`);
@@ -210,6 +234,16 @@ class Type{
 	isWeakTo(otherType){
 		return this.weaknesses[otherType.name] ? true : false;
 	}
+
+	info(){
+		let a = [];
+		a.push(`=-- weaknesses`);
+		let b = Object.keys(this.weaknesses);
+		for(let i = 0; i < b.length; i ++){
+			a.push(`- ${b[i]}`);
+		}
+		return box(a, this.name);
+	}
 }
 
 class Move{
@@ -243,6 +277,16 @@ class Move{
 		} else {
 			return {damage: 0, myStatusEffect: null, theirStatusEffect: null, description: `${this.name} missed!`};
 		}
+	}
+
+	info(){
+		let a = [];
+		a.push(`=-- accuracy`);
+		a.push(`- ${this.accuracy}`);
+		a.push(``);
+		a.push(`=-- type`);
+		a.push(`- ${this.type.name}`);
+		return box(a, this.name);
 	}
 }
 
@@ -316,12 +360,16 @@ class Pokeman{
 		return this.moves[i];
 	}
 
-	printMoves(){
+	printMoves(w = 0){
 		let a = [];
 		for(let i = 1; i <= this.moves.length; i++){
-			a.push(`${i} --- ${this.moves[i - 1].name} - ${this.moves[i - 1].type.name}`);
+			let b = "";
+			for(let j = this.moves[i - 1].name.length; j < 20; j++){
+				b += " ";
+			}
+			a.push(`${i} --- ${this.moves[i - 1].name}${b} - ${this.moves[i - 1].type.name}`);
 		}
-		return box(a);
+		return box(a,"",w);
 	}
 
 	//Move getMoveByName(name: String)
@@ -405,7 +453,13 @@ class Pokeman{
 			a.push(``);
 			a.push(`- health -- ${this.uniqueStats.healthStat}`);
 		}
-		return box(a, this.getName());
+		let out = box(a, this.getName(), 50);
+		if(showLevel){
+			a.push(``);
+			a.push(`=--- Moves`);
+			out = box(a, this.getName(), 40) + this.printMoves(40);
+		}
+		return out;
 	}
 }
 
