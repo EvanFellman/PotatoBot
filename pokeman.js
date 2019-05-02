@@ -326,7 +326,7 @@ class Pokeman{
 
 	//natural calcMaxHealth() returns maxHealth
 	calcMaxHealth(){
-		return Math.round(((150 + this.uniqueStats.healthStat) / 200) * this.baseStats.healthStat * this.level / 3);
+		return Math.round((this.uniqueStats.healthStat / 100) * this.baseStats.healthStat * (this.level / 3));
 	}
 
 	//sets health to full and resets status
@@ -417,9 +417,8 @@ class Pokeman{
 				}
 			}
 			let a = this.moves[moveIndex].attack(this, otherMonster);
-			console.log(a.damage);
-			a.damage *= ((this.baseStats.attackStat + this.uniqueStats.attackStat) / 200) * Math.round(this.level * 0.5);
-			a.damage *= Math.round(((200 + (200 - (otherMonster.baseStats.defenseStat + otherMonster.uniqueStats.defenseStat))) / 400) / Math.round(otherMonster.level / 2));
+			a.damage *= ((this.baseStats.attackStat + this.uniqueStats.attackStat) / 200) * ((this.level / otherMonster.level) * 0.5);
+			a.damage *= Math.round((200 + (200 - (otherMonster.baseStats.defenseStat + otherMonster.uniqueStats.defenseStat))) / 400);
 			let description = "";
 			if(a.damage < 0){
 				this.health += (-1) * a.damage;
@@ -437,7 +436,7 @@ class Pokeman{
 				description += ` ${otherMonster.getName()} now is ${otherMonster.status.description}.`;
 			}
 			
-			return `${description}${this.getName()} used ${this.moves[moveIndex].name}! ${a.description} ${statusString}`;
+			return `${this.getName()} used ${this.moves[moveIndex].name}! ${description} ${a.description} ${statusString}`;
 		}
 	}
 
@@ -577,9 +576,3 @@ pokemans["Dog"] = (level, xp, stats, owner) => new Pokeman("Dog", types["grass"]
 //						  () => new StatusEffect(name: String, desc: String, type: Type, active: boolean, attackFunc(thisM: Pokeman) => number, freeFunc(thisM: Pokeman) => boolean);
 statusEffects["poison"] = () => new StatusEffect("poison", "poisoned", types["toxic"], true, (thisM) => thisM.calcMaxHealth() / 8, (thisM) => (Math.random() * (500 - (thisM.baseStats.speedStat + thisM.uniqueStats.speedStat)) < 50));
 statusEffects["sleep"] = () => new StatusEffect("sleep", "sleeping", types["water"], false, (thisM) => 0, (thisM) => (Math.random() * (500 - (thisM.baseStats.speedStat + thisM.uniqueStats.speedStat))) < 100);
-
-let a = pokemans["Yah Yeet"](1, 0, null,"Yooooo");
-let b = pokemans["Yah Yeet"]();
-// console.log(a.attack(b, 0));
-// console.log(b.printHealthBar());
-// console.log(a.info(true, true));
