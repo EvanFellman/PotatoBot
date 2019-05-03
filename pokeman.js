@@ -38,15 +38,15 @@ module.exports = class Main{
 		} else if(command.length >= 2 && (command[0] === "pokebattle" || command[0] === "pokemanbattle" || command[0] === "pokemonbattle" || command[0] === "pb")){
 			if(command.length == 2 && (command[1] === "list" || command[1] === "l")){
 				const a = this.getPokemans(usersData, author);
-				let out = "";
+				let out = [];
 				for(let i = 0; i < a.length; i++){
 					let b = "";
 					for(let j = a[i].getName().length; j < 20; j++){
 						b += " ";
 					}
-					out += `\n${i+1}. ${a[i].getName()}${b}lvl${a[i].level}`;
+					out.push(`${i+1}. ${a[i].getName()}${b}lvl${a[i].level}`);
 				}
-				msg.channel.send(out.substring(1));
+				msg.channel.send(box(out));
 			} else if((command[1] === "pokedex" || command[1] === "info" || command[1] === "i")){
 				if(!isNaN(command[2])){
 					msg.channel.send(this.getPokeman(usersData, author, parseInt(command[2]) - 1).info(true, true), {split: true});
@@ -121,37 +121,41 @@ module.exports = class Main{
 				if(games[msg.channel.id] && games[msg.channel.id][author.id] && games[msg.channel.id][author.id].wildBattle){
 					const thisGame = games[msg.channel.id][author.id];
 					const userPokeman = thisGame.userPokeman;
-					const wildPokeman = thisGame.wildPokeman;
-					let out = "";
-					if(userPokeman.health <= 0){
-						out += `${userPokeman.getName()} fainted. You lost ${thisGame.bet} monies.`;
-						moneyModule.increaseBalance(usersData, author, (-1) * thisGame.bet);
-						delete games[msg.channel.id][author.id];
+					if(parseInt(command[2]) < 1 || parseInt(command[2]) > userPokeman.moves.length){
+						msg.reply("that is not a valid move number.");
 					} else {
-						out += `${userPokeman.attack(wildPokeman, parseInt(command[2]) - 1)}\n`;
-						out += `${thisGame.userPokeman.getName()}'s health:\n${thisGame.userPokeman.printHealthBar()}`;
-						out += `\n\n ${thisGame.wildPokeman.getName()}'s health:\n${thisGame.wildPokeman.printHealthBar()}\n\n\n\n`;
-						if(wildPokeman.health <= 0){
-							out += `${wildPokeman.getName()} fainted. You won ${thisGame.bet} monies.`;
-							moneyModule.increaseBalance(usersData, author, thisGame.bet);
-							userPokeman.increaseXP(wildPokeman.level);
+						const wildPokeman = thisGame.wildPokeman;
+						let out = "";
+						if(userPokeman.health <= 0){
+							out += `${userPokeman.getName()} fainted. You lost ${thisGame.bet} monies.`;
+							moneyModule.increaseBalance(usersData, author, (-1) * thisGame.bet);
 							delete games[msg.channel.id][author.id];
-							this.savePokeman(usersData, author, userPokeman);
 						} else {
-							out += `${wildPokeman.attack(userPokeman, Math.floor(Math.random() * thisGame.wildPokeman.moves.length))}\n`;
+							out += `${userPokeman.attack(wildPokeman, parseInt(command[2]) - 1)}\n`;
 							out += `${thisGame.userPokeman.getName()}'s health:\n${thisGame.userPokeman.printHealthBar()}`;
-							out += `\n\n ${thisGame.wildPokeman.getName()}'s health:\n${thisGame.wildPokeman.printHealthBar()}`;
-							if(userPokeman.health <= 0){
-								out += `\n${userPokeman.getName()} fainted. You lost ${thisGame.bet} monies.`;
-								moneyModule.increaseBalance(usersData, author, (-1) * thisGame.bet);
+							out += `\n\n ${thisGame.wildPokeman.getName()}'s health:\n${thisGame.wildPokeman.printHealthBar()}\n\n\n\n`;
+							if(wildPokeman.health <= 0){
+								out += `${wildPokeman.getName()} fainted. You won ${thisGame.bet} monies.`;
+								moneyModule.increaseBalance(usersData, author, thisGame.bet);
+								userPokeman.increaseXP(wildPokeman.level);
 								delete games[msg.channel.id][author.id];
+								this.savePokeman(usersData, author, userPokeman);
 							} else {
-								out += `\nUse \`pokebattle attack <move number>\` to use a move`;
-								out += `${thisGame.userPokeman.printMoves()}`;
+								out += `${wildPokeman.attack(userPokeman, Math.floor(Math.random() * thisGame.wildPokeman.moves.length))}\n`;
+								out += `${thisGame.userPokeman.getName()}'s health:\n${thisGame.userPokeman.printHealthBar()}`;
+								out += `\n\n ${thisGame.wildPokeman.getName()}'s health:\n${thisGame.wildPokeman.printHealthBar()}`;
+								if(userPokeman.health <= 0){
+									out += `\n${userPokeman.getName()} fainted. You lost ${thisGame.bet} monies.`;
+									moneyModule.increaseBalance(usersData, author, (-1) * thisGame.bet);
+									delete games[msg.channel.id][author.id];
+								} else {
+									out += `\nUse \`pokebattle attack <move number>\` to use a move`;
+									out += `${thisGame.userPokeman.printMoves()}`;
+								}
 							}
 						}
+						msg.channel.send(out, {split: true});
 					}
-					msg.channel.send(out, {split: true});
 				}
 			} else if(command.length === 2 && (command[1] === "throwball" || command[1] === "throw" || command[1] === "t") && games[msg.channel.id] && games[msg.channel.id][author.id] && games[msg.channel.id][author.id].wildBattle){
 				if(this.getBalls(usersData, author) > 0){
@@ -166,6 +170,8 @@ module.exports = class Main{
 					} else {
 						msg.channel.send(`It escaped!`);
 					}
+				} else {
+					msg.reply(`you need to buy balls. To do this run \`buy balls <amount>\``)
 				}
 			}
 		}
@@ -416,27 +422,31 @@ class Pokeman{
 					this.status = null;
 				}
 			}
-			let a = this.moves[moveIndex].attack(this, otherMonster);
-			a.damage *= ((this.baseStats.attackStat + this.uniqueStats.attackStat) / 200) * ((this.level / otherMonster.level) * 0.5);
-			a.damage *= Math.round((200 + (200 - (otherMonster.baseStats.defenseStat + otherMonster.uniqueStats.defenseStat))) / 400);
-			let description = "";
-			if(a.damage < 0){
-				this.health += (-1) * a.damage;
-				description += `${this.getName()} has healed ${(-1) * a.damage} health!`;
-			} else if(a.damage > 0){
-				otherMonster.health -= a.damage;
-				description += `${otherMonster.getName()} has lost ${a.damage} health!`;
+			if(moveIndex >= this.moves.length || moveIndex < 0){
+				return;
+			} else {
+				let a = this.moves[moveIndex].attack(this, otherMonster);
+				a.damage *= ((this.baseStats.attackStat + this.uniqueStats.attackStat) / 200) * ((this.level / otherMonster.level) * 0.5);
+				a.damage *= Math.round((200 + (200 - (otherMonster.baseStats.defenseStat + otherMonster.uniqueStats.defenseStat))) / 400);
+				let description = "";
+				if(a.damage < 0){
+					this.health += (-1) * a.damage;
+					description += `${this.getName()} has healed ${(-1) * a.damage} health!`;
+				} else if(a.damage > 0){
+					otherMonster.health -= a.damage;
+					description += `${otherMonster.getName()} has lost ${a.damage} health!`;
+				}
+				if(a.myStatusEffect !== null && this.status === null){
+					this.status = a.myStatusEffect;
+					description += ` ${this.getName()} now is ${this.status.description}.`;
+				}
+				if(a.theirStatusEffect !== null && otherMonster.status === null){
+					otherMonster.status = a.theirStatusEffect;
+					description += ` ${otherMonster.getName()} now is ${otherMonster.status.description}.`;
+				}
+				
+				return `${this.getName()} used ${this.moves[moveIndex].name}! ${description} ${a.description} ${statusString}`;
 			}
-			if(a.myStatusEffect !== null && this.status === null){
-				this.status = a.myStatusEffect;
-				description += ` ${this.getName()} now is ${this.status.description}.`;
-			}
-			if(a.theirStatusEffect !== null && otherMonster.status === null){
-				otherMonster.status = a.theirStatusEffect;
-				description += ` ${otherMonster.getName()} now is ${otherMonster.status.description}.`;
-			}
-			
-			return `${this.getName()} used ${this.moves[moveIndex].name}! ${description} ${a.description} ${statusString}`;
 		}
 	}
 
