@@ -166,6 +166,7 @@ module.exports = class Main{
 						wildPoke.xp = 0;
 						wildPoke.level = 1;
 						this.addPokeman(usersData, author, wildPoke);
+						delete games[msg.channel.id][author.id];
 						msg.channel.send(`You caught a ${wildPoke.getName()}!`);
 					} else {
 						msg.channel.send(`It escaped!`);
