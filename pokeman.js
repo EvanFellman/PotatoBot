@@ -132,10 +132,10 @@ module.exports = class Main{
 							delete games[msg.channel.id][author.id];
 						} else {
 							out += `${userPokeman.attack(wildPokeman, parseInt(command[2]) - 1)}\n`;
-							out += `${thisGame.userPokeman.getName()}'s health:\n${thisGame.userPokeman.printHealthBar()}`;
-							out += `\n\n ${thisGame.wildPokeman.getName()}'s health:\n${thisGame.wildPokeman.printHealthBar()}\n\n\n\n`;
 							if(wildPokeman.health <= 0){
 								out += `${wildPokeman.getName()} fainted. You won ${thisGame.bet} monies.`;
+								out += `${thisGame.userPokeman.getName()}'s health:\n${thisGame.userPokeman.printHealthBar()}`;
+								out += `\n\n ${thisGame.wildPokeman.getName()}'s health:\n${thisGame.wildPokeman.printHealthBar()}`;
 								moneyModule.increaseBalance(usersData, author, thisGame.bet);
 								userPokeman.increaseXP(wildPokeman.level);
 								delete games[msg.channel.id][author.id];
@@ -174,6 +174,11 @@ module.exports = class Main{
 				} else {
 					msg.reply(`you need to buy balls. To do this run \`buy balls <amount>\``)
 				}
+			} else if(command.length === 3 && (command[1] === "bye" || command[1] === "kill" || command[1] === "k")){
+				if(parseInt(command[2]) > 0 && parseInt(command[2]) <= usersData[author.id].pokemans.length){
+					this.killPokeman(usersData, author, parseInt(command[2]) - 1);
+					msg.reply("it has been sent to the slaughterhouse.");
+				}
 			}
 		}
 	}
@@ -198,6 +203,11 @@ module.exports = class Main{
 			out.push(pokemans[usersData[user.id].pokemans[i][0]](usersData[user.id].pokemans[i][1], usersData[user.id].pokemans[i][2], usersData[user.id].pokemans[i][3]));
 		}
 		return out;
+	}
+
+	killPokeman(usersData, user, num){
+		usersData[user.id].pokemans.splice(num, 1);
+		slModule.save(usersData);
 	}
 
 	getPokeman(usersData, user, index){
