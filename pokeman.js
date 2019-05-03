@@ -99,7 +99,7 @@ module.exports = class Main{
 				//	When making a two player pokeman battle, make one reference the other (example: games[msg.channel][author.id] = games[msg.channel][otherPlayer.id]; )
 				//		Therefore both players can edit and access the same game without needing to update both after doing something.
 				//wildBattle: bool, userPokeman: Pokeman, wildPokeman: Pokeman, bet: float
-				games[msg.channel.id][author.id] = {wildBattle: true, userPokeman: userPokeman, wildPokeman: wildPokeman, bet: Math.abs(parseInt(command[3]))};
+				games[msg.channel.id][author.id] = {wildBattle: true, invite: false, battle: false, userPokeman: userPokeman, wildPokeman: wildPokeman, bet: Math.abs(parseInt(command[3]))};
 				let thisGame = games[msg.channel.id][author.id];
 				let out = `${thisGame.userPokeman.getName()} is battling a level ${thisGame.wildPokeman.level} ${thisGame.wildPokeman.getName()} for ${thisGame.bet} monies.\n`;
 				thisGame.userPokeman.resetPokeman();
@@ -117,6 +117,98 @@ module.exports = class Main{
 				out += `\nUse \`pokebattle attack <move number>\` to use a move`;
 				out += `${thisGame.userPokeman.printMoves()}`;
 				msg.channel.send(out, {split: true});
+			} else if(command.length === 2 && (command[1] === "e" || command[1] === "end")){
+				if(games[msg.channel.id] && games[msg.channel.id][author.id]){
+					delete games[msg.channel.id][author.id];
+					msg.reply("game is ended.");
+				} else {
+					msg.reply("there is no game to end.");
+				}
+			} else if(command.length >= 5 && (command[1] === "b" || command[1] === "battle")){
+				if(games[msg.channel.id] && !games[msg.channel.id][author.id]){
+					const otherUser = msg.mentions.users.first();
+					if(moneyModule.getBalance(usersData, author) < parseInt(command[3])){
+						msg.reply("you don't have enough monies!");
+					} else if(moneyModule.getBalance(usersData, otherUser) < parseInt(command[3])){
+						msg.reply("they don't have enough monies!");
+					} else {
+						const ppokes = this.getPokemans(usersData, author);
+						const npokes = command.slice(4).map(x => parseInt(x));
+						let pokes = [];
+						for(let i = 0; i < npokes.length; i++){
+							if(npokes[i] < 1 || npokes[i] > ppokes.length){
+								msg.reply(`not valid pokeman number.`);
+								return;
+							}
+							pokes.push(ppokes[npokes[i - 1]]);
+						}
+						games[msg.channel.id][author.id] = {wildBattle: false, invite: true, battle: false, userToInvite: otherUser.id, pokes: pokes, pokeNum: npokes};
+						msg.channel.send(`<@${author.id}> has invited <@${otherUser.id}> to a PokeBattle for ${command[3]} monies.`);
+					}
+				} else {
+					msg.reply("you already have a game!");
+				}
+			} else if(command.length === 2 && (command[1] === "decline" || command[1] === "d")){
+				const otherUser = msg.mentions.users.first();
+				if(games[msg.channel.id] && games[msg.channel.id][otherUser.id] && games[msg.channel.id][otherUser.id].invite){
+					msg.channel.send(`<@${author.id}> declined <@${otherUser.id}>'s offer to battle.`);
+					delete games[msg.channel.id][otherUser.id];
+				} else {
+					msg.reply(`you were not invited to any battles.`);
+				}
+			} else if(command.length >= 3 && (command[1] === "accept")){
+				const otherUser = msg.mentions.users.first();
+				if(games[msg.channel.id] && (!games[msg.channel.id][author.id]) && (games[msg.channel.id][otherUser.id] && games[msg.channel.id][otherUser.id].invite)){
+					const ppokes2 = this.getPokemans(usersData, otherUser);
+					const npokes2 = command.slice(3).map(x => parseInt(x));
+					let pokes2 = [];
+					for(let i = 0; i < npokes2.length; i++){
+						if(npokes2[i] < 1 || npokes2[i] > ppokes2.length){
+							msg.reply(`not valid pokeman number.`);
+							return;
+						} else {
+							pokes2.push(ppokes2[npokes2[i]]);
+						}
+					}
+					const pokes1 = games[msg.channel.id][otherUser.id].pokes;
+					const pokeNum1 = games[msg.channel.id][otherUser.id].pokeNum;
+					//A battle has many properties: 
+					//	wildBattle = false
+					//	invite = false
+					//	battle = true
+					//	player1: User this represents one player
+					//	player2: User this represents another player
+					//	pokes1: Pokeman[] this represents an array of Pokemans (first is the one that is currently out) for player1
+					//	pokes2: Pokeman[] this represents an array of Pokemans (first is the one that is currently out) for player2
+					//	pokeNum1: PositiveNatural[] this represents an array of numbers which correlates to the pokemans in pokes1
+					//	pokeNum2: PositiveNatural[] this represents an array of numbers which correlates to the pokemans in pokes2
+					games[msg.channel.id][otherUser.id] = {wildBattle: false, invite: false, battle: true, player1: otherUser, pokes1: pokes1, pokeNum1: npokes1, player2: author, pokes2: pokes2, pokeNum2: npokes2};
+					games[msg.channel.id][author.id] = games[msg.channel][otherUser.id];
+					const thisGame = games[msg.channel.id][author.id];
+					const p1 = thisGame.p1;
+					const p2 = thisGame.p2;
+					const p1Poke = thisGame.pokes1[0];
+					const p2Poke = thisGame.pokes2[0];
+					p1Poke.resetPokeman();
+					p2Poke.resetPokeman();
+					if(p1Poke.baseStats.speedStat + p1Poke.uniqueStats.speedStat >= p2Poke.baseStats.speedStat + p2Poke.uniqueStats.speedStat){
+						//p1 goes first
+						let out = `It is <@${p1.id}>'s turn.\n${thisGame.p1Poke.getName()}'s health:\n${thisGame.p1Poke.printHealthBar()}`;
+						out += `\n\n ${thisGame.p2.getName()}'s health:\n${thisGame.p2.printHealthBar()}`;
+						out += `\nUse \`pokebattle attack <move number>\` to use a move. Or use \`switch <pokeNumber>\` to switch to a different pokeman.`;
+						out += `${thisGame.p1Poke.printMoves()}`;
+						msg.channel.send(out, {split: true});
+					} else {
+						//p2 goes first
+						let out = `It is <@${p2.id}>'s turn.\n${thisGame.p2Poke.getName()}'s health:\n${thisGame.p2Poke.printHealthBar()}`;
+						out += `\n\n ${thisGame.p1.getName()}'s health:\n${thisGame.p1.printHealthBar()}`;
+						out += `\nUse \`pokebattle attack <move number>\` to use a move. Or use \`switch <pokeNumber>\` to switch to a different pokeman.`;
+						out += `${thisGame.p2Poke.printMoves()}`;
+						msg.channel.send(out, {split: true});
+					}
+				} else {
+					msg.reply(`you have no invites to accept.`);
+				}
 			} else if(command.length === 3 && (command[1] === "attack" || command[1] === "a")){
 				if(games[msg.channel.id] && games[msg.channel.id][author.id] && games[msg.channel.id][author.id].wildBattle){
 					const thisGame = games[msg.channel.id][author.id];
