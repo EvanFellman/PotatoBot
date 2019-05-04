@@ -125,6 +125,9 @@ module.exports = class Main{
 					msg.reply("there is no game to end.");
 				}
 			} else if(command.length >= 5 && (command[1] === "b" || command[1] === "battle")){
+				if(!games[msg.channel.id]){
+					games[msg.channel.id] = {};
+				}
 				if(games[msg.channel.id] && !games[msg.channel.id][author.id]){
 					const otherUser = msg.mentions.users.first();
 					if(moneyModule.getBalance(usersData, author) < parseInt(command[3])){
@@ -148,7 +151,7 @@ module.exports = class Main{
 				} else {
 					msg.reply("you already have a game!");
 				}
-			} else if(command.length === 2 && (command[1] === "decline" || command[1] === "d")){
+			} else if(command.length === 3 && (command[1] === "decline" || command[1] === "d")){
 				const otherUser = msg.mentions.users.first();
 				if(games[msg.channel.id] && games[msg.channel.id][otherUser.id] && games[msg.channel.id][otherUser.id].invite){
 					msg.channel.send(`<@${author.id}> declined <@${otherUser.id}>'s offer to battle.`);
@@ -184,7 +187,8 @@ module.exports = class Main{
 					//	pokeNum2: PositiveNatural[] this represents an array of numbers which correlates to the pokemans in pokes2
 					//	turn: PositiveNatural this is the id of who's turn it is
 					//	bet: how many monies
-					games[msg.channel.id][otherUser.id] = {wildBattle: false, invite: false, battle: true, turn: null, bet: games[msg.channel.id][otherUser.id].bet, player1: otherUser, pokes1: pokes1, pokeNum1: npokes1, player2: author, pokes2: pokes2, pokeNum2: npokes2};
+					games[msg.channel.id][otherUser.id] = {wildBattle: false, invite: false, battle: true, turn: null, bet: games[msg.channel.id][otherUser.id].bet, 
+						player1: otherUser, pokes1: pokes1, pokeNum1: npokes1, player2: author, pokes2: pokes2, pokeNum2: npokes2};
 					games[msg.channel.id][author.id] = games[msg.channel][otherUser.id];
 					const thisGame = games[msg.channel.id][author.id];
 					const p1 = thisGame.p1;
@@ -347,10 +351,10 @@ module.exports = class Main{
 								let out = `${userPokeman.attack(otherPokeman, parseInt(command[2]) - 1)}\n`;
 								if(userPokeman.health <= 0){
 									//we fainted from status D:
-									out += `${userPokes[0].getName()} fainted.`;
+									out += `${userPokes[0].getName()} fainted.\n`;
 									const dead = userPokes.shift();
 									if(userPokes.length === 0){
-										msg.channel.send(`${out} <@${author.id}> ran out of Pokemans. <@${otherUser.id}> made ${thisGame.bet} monies.`, {split: true});
+										msg.channel.send(`${out}<@${author.id}> ran out of Pokemans. <@${otherUser.id}> made ${thisGame.bet} monies.`, {split: true});
 										moneyModule.increaseBalance(usersData, otherUser, thisGame.bet);
 										moneyModule.increaseBalance(usersData, author, (-1) * thisGame.bet);
 										return;
@@ -358,13 +362,12 @@ module.exports = class Main{
 										userPokeman = userPokes[0];
 									}
 								}
-								//we survived attack status :D
 								if(otherPokeman.health <= 0){
 									//they fainted D:
-									out += `${otherPokes[0].getName()} fainted.`;
+									out += `${otherPokes[0].getName()} fainted.\n`;
 									const dead = otherPokes.shift();
 									if(otherPokes.length === 0){
-										msg.channel.send(`${out} <@${otherUser.id}> ran out of Pokemans. <@${author.id}> made ${thisGame.bet} monies.`, {split: true});
+										msg.channel.send(`${out}<@${otherUser.id}> ran out of Pokemans. <@${author.id}> made ${thisGame.bet} monies.`, {split: true});
 										moneyModule.increaseBalance(usersData, author, thisGame.bet);
 										moneyModule.increaseBalance(usersData, otherUser, (-1) * thisGame.bet);
 										return;
@@ -372,9 +375,6 @@ module.exports = class Main{
 										otherPokeman = otherPokes[0];
 										
 									}
-								} else {
-									//they survived :D
-									
 								}
 								out += `It is <@${otherUser.id}>'s turn.\n${otherPokeman.getName()}'s health:\n${otherPokeman.printHealthBar()}`;
 								out += `\n\n ${userPokeman.getName()}'s health:\n${userPokeman.printHealthBar()}`;
@@ -754,7 +754,8 @@ class StatusEffect{
 			damage *= this.type.isWeakTo(thisMonster.type) ? 0.5 : 1;
 			damage *= (200 + (200 - (thisMonster.baseStats.defenseStat + thisMonster.uniqueStats.defenseStat))) / 400;
 			thisMonster.health -= damage;
-			return damage === 0 ? (!this.active ? ` ${thisMonster.getName()} is ${this.description} and cannot fight!` : ` ${thisMonster.getName()} is still ${this.description}.`) : ` ${thisMonster.getName()} lost ${damage} health because they are ${this.description}.`;
+			return damage === 0 ? (!this.active ? ` ${thisMonster.getName()} is ${this.description} and cannot fight!` : 
+				` ${thisMonster.getName()} is still ${this.description}.`) : ` ${thisMonster.getName()} lost ${damage} health because they are ${this.description}.`;
 		}
 	}
 }
