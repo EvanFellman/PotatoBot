@@ -347,30 +347,41 @@ module.exports = class Main{
 								let out = `${userPokeman.attack(otherPokeman, parseInt(command[2]) - 1)}\n`;
 								if(userPokeman.health <= 0){
 									//we fainted from status D:
+									out += `${userPokes[0].getName()} fainted.`;
 									const dead = userPokes.shift();
 									if(userPokes.length === 0){
 										msg.channel.send(`${out} <@${author.id}> ran out of Pokemans. <@${otherUser.id}> made ${thisGame.bet} monies.`, {split: true});
 										moneyModule.increaseBalance(usersData, otherUser, thisGame.bet);
+										moneyModule.increaseBalance(usersData, author, (-1) * thisGame.bet);
+										return;
 									} else {
 										userPokeman = userPokes[0];
-										out += `It is <@${otherUser.id}>'s turn.\n${otherPokeman.getName()}'s health:\n${otherPokeman.printHealthBar()}`;
-										out += `\n\n ${userPokeman.getName()}'s health:\n${userPokeman.printHealthBar()}`;
-										out += `\nUse \`pokebattle attack <move number>\` to use a move. Or use \`pokebattle switch <pokeNumber>\` to switch to a different pokeman.`;
-										out += `${otherPokeman.printMoves()}`;
-										msg.channel.send(out, {split: true});
-										thisGame.turn = otherUser.id;
-									}
-								} else {
-									//we survived attack status :D
-									if(otherPokeman.health <= 0){
-										//they fainted D:
-										const dead = otherPokes.shift();
-										
-									} else {
-										//they survived :D
-										
 									}
 								}
+								//we survived attack status :D
+								if(otherPokeman.health <= 0){
+									//they fainted D:
+									out += `${otherPokes[0].getName()} fainted.`;
+									const dead = otherPokes.shift();
+									if(otherPokes.length === 0){
+										msg.channel.send(`${out} <@${otherUser.id}> ran out of Pokemans. <@${author.id}> made ${thisGame.bet} monies.`, {split: true});
+										moneyModule.increaseBalance(usersData, author, thisGame.bet);
+										moneyModule.increaseBalance(usersData, otherUser, (-1) * thisGame.bet);
+										return;
+									} else {
+										otherPokeman = otherPokes[0];
+										
+									}
+								} else {
+									//they survived :D
+									
+								}
+								out += `It is <@${otherUser.id}>'s turn.\n${otherPokeman.getName()}'s health:\n${otherPokeman.printHealthBar()}`;
+								out += `\n\n ${userPokeman.getName()}'s health:\n${userPokeman.printHealthBar()}`;
+								out += `\nUse \`pokebattle attack <move number>\` to use a move. Or use \`pokebattle switch <pokeNumber>\` to switch to a different pokeman.`;
+								out += `${otherPokeman.printMoves()}`;
+								msg.channel.send(out, {split: true});
+								thisGame.turn = otherUser.id;
 							}
 						}
 					}
