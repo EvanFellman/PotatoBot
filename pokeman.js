@@ -159,7 +159,7 @@ module.exports = class Main{
 				} else {
 					msg.reply(`you were not invited to any battles.`);
 				}
-			} else if(command.length >= 3 && (command[1] === "accept")){
+			} else if(command.length >= 4 && (command[1] === "accept")){
 				const otherUser = msg.mentions.users.first();
 				if(games[msg.channel.id] && (!games[msg.channel.id][author.id]) && (games[msg.channel.id][otherUser.id] && games[msg.channel.id][otherUser.id].invite)){
 					const ppokes2 = this.getPokemans(usersData, otherUser);
@@ -174,7 +174,7 @@ module.exports = class Main{
 						}
 					}
 					const pokes1 = games[msg.channel.id][otherUser.id].pokes;
-					const pokeNum1 = games[msg.channel.id][otherUser.id].pokeNum;
+					const npokes1 = games[msg.channel.id][otherUser.id].pokeNum;
 					//A battle has many properties: 
 					//	wildBattle = false
 					//	invite = false
@@ -188,11 +188,12 @@ module.exports = class Main{
 					//	turn: PositiveNatural this is the id of who's turn it is
 					//	bet: how many monies
 					games[msg.channel.id][otherUser.id] = {wildBattle: false, invite: false, battle: true, turn: null, bet: games[msg.channel.id][otherUser.id].bet, 
-						player1: otherUser, pokes1: pokes1, pokeNum1: npokes1, player2: author, pokes2: pokes2, pokeNum2: npokes2};
-					games[msg.channel.id][author.id] = games[msg.channel][otherUser.id];
+						player1: otherUser, p1: otherUser, pokes1: pokes1, pokeNum1: npokes1, player2: author,p2: author, pokes2: pokes2, pokeNum2: npokes2};
+					games[msg.channel.id][author.id] = games[msg.channel.id][otherUser.id];
 					const thisGame = games[msg.channel.id][author.id];
-					const p1 = thisGame.p1;
-					const p2 = thisGame.p2;
+					console.log(games[msg.channel.id][author.id]);
+					const p1 = thisGame.player1;
+					const p2 = thisGame.player2;
 					const p1Poke = thisGame.pokes1[0];
 					const p2Poke = thisGame.pokes2[0];
 					p1Poke.resetPokeman();
@@ -219,6 +220,8 @@ module.exports = class Main{
 				}
 			} else if(command.length === 3 && (command[1] === "s" || command[1] === "switch")){
 				if(games[msg.channel.id] && games[msg.channel.id][author.id] && games[msg.channel.id][author.id].battle){
+					const p1 = games[msg.channel.id][author.id].player1;
+					const p2 = games[msg.channel.id][author.id].player2;
 					if(games[msg.channel.id][author.id].turn !== author.id){
 						msg.reply(`it is not your turn.`);
 					} else if(isNaN(command[2])){
@@ -228,13 +231,13 @@ module.exports = class Main{
 						const switchTo = parseInt(command[2]) - 1;
 						if(switchTo < 0){
 							msg.reply(`not a proper PokeNumber`);
-						} else if(author.id === thisGame.p1.id){
+						} else if(author.id === thisGame.player1.id){
 							//author is player 1
 							if(switchTo >= thisGame.pokeNum1.length){
 								msg.reply(`not a proper PokeNumber`);
 							} else {
-								for(let i = 0; i < thisGame.npokes1.length;i++){
-									if(thisGame.npokes1[i] === switchTo){
+								for(let i = 0; i < thisGame.pokeNum1.length;i++){
+									if(thisGame.pokeNum1[i] === switchTo){
 										const tempPoke = thisGame.pokes1[i];
 										const tempNum = thisGame.pokeNum1[i];
 										thisGame.pokes1[i] = thisGame.pokes1[0];
@@ -245,10 +248,10 @@ module.exports = class Main{
 									}
 								}
 								msg.channel.send(`<@${p1.id}> has switched to ${thisGame.pokes1[0].getName()}!`);
-								let out = `It is <@${p2.id}>'s turn.\n${thisGame.pokes2[0].getName()}'s health:\n${thisGame.pokes2.printHealthBar()}`;
-								out += `\n\n ${thisGame.pokes1.getName()}'s health:\n${thisGame.pokes1.printHealthBar()}`;
+								let out = `It is <@${p2.id}>'s turn.\n${thisGame.pokes2[0].getName()}'s health:\n${thisGame.pokes2[0].printHealthBar()}`;
+								out += `\n\n ${thisGame.pokes1[0].getName()}'s health:\n${thisGame.pokes1[0].printHealthBar()}`;
 								out += `\nUse \`pokebattle attack <move number>\` to use a move. Or use \`pokebattle switch <pokeNumber>\` to switch to a different pokeman.`;
-								out += `${thisGame.pokes2.printMoves()}`;
+								out += `${thisGame.pokes2[0].printMoves()}`;
 								msg.channel.send(out, {split: true});
 								thisGame.turn = p2.id;
 							}
@@ -257,8 +260,8 @@ module.exports = class Main{
 							if(switchTo >= thisGame.pokeNum2.length){
 								msg.reply(`not a proper PokeNumber`);
 							} else {
-								for(let i = 0; i < thisGame.npokes2.length;i++){
-									if(thisGame.npokes2[i] === switchTo){
+								for(let i = 0; i < thisGame.pokeNum2.length;i++){
+									if(thisGame.pokeNum2[i] === switchTo){
 										const tempPoke = thisGame.pokes2[i];
 										const tempNum = thisGame.pokeNum2[i];
 										thisGame.pokes2[i] = thisGame.pokes2[0];
@@ -269,10 +272,10 @@ module.exports = class Main{
 									}
 								}
 								msg.channel.send(`<@${p2.id}> has switched to ${thisGame.pokes2[0].getName()}!`);
-								let out = `It is <@${p1.id}>'s turn.\n${thisGame.pokes1[0].getName()}'s health:\n${thisGame.pokes1.printHealthBar()}`;
-								out += `\n\n ${thisGame.pokes2.getName()}'s health:\n${thisGame.pokes2.printHealthBar()}`;
+								let out = `It is <@${p1.id}>'s turn.\n${thisGame.pokes1[0].getName()}'s health:\n${thisGame.pokes1[0].printHealthBar()}`;
+								out += `\n\n ${thisGame.pokes2[0].getName()}'s health:\n${thisGame.pokes2[0].printHealthBar()}`;
 								out += `\nUse \`pokebattle attack <move number>\` to use a move. Or use \`pokebattle switch <pokeNumber>\` to switch to a different pokeman.`;
-								out += `${thisGame.pokes1.printMoves()}`;
+								out += `${thisGame.pokes1[0].printMoves()}`;
 								msg.channel.send(out, {split: true});
 								thisGame.turn = p1.id;
 							}
@@ -332,14 +335,16 @@ module.exports = class Main{
 							let userPokeman = null;
 							let otherPokeman = null;
 							let otherUser = null;
-							if(thisGame.p1.id === author.id){
+							let userPokeN = null;
+							let otherPokeN = null;
+							if(thisGame.player1.id === author.id){
 								userPokes = thisGame.pokes1;
 								otherPokes = thisGame.pokes2;
 								userPokeN = thisGame.pokeNum1;
 								otherPokeN = thisGame.pokeNum2;
 								userPokeman = userPokes[0];
 								otherPokeman = otherPokes[0];
-								otherUser = thisGame.p2;
+								otherUser = thisGame.player2;
 							} else {
 								userPokes = thisGame.pokes2;
 								otherPokes = thisGame.pokes1;
@@ -347,7 +352,7 @@ module.exports = class Main{
 								otherPokeN = thisGame.pokeNum1;
 								userPokeman = userPokes[0];
 								otherPokeman = otherPokes[0];
-								otherUser = thisGame.p1;
+								otherUser = thisGame.player1;
 							}
 							if(!isNaN(command[2]) && (parseInt(command[2]) < 1 || parseInt(command[2]) > userPokeman.moves.length)){
 								msg.reply("that is not a valid move number.");
@@ -435,7 +440,7 @@ module.exports = class Main{
 	getPokemans(usersData, user){
 		let out = [];
 		for(let i = 0; i < usersData[user.id].pokemans.length; i++){
-			out.push(pokemans[usersData[user.id].pokemans[i][0]](usersData[user.id].pokemans[i][1], usersData[user.id].pokemans[i][2], usersData[user.id].pokemans[i][3]));
+			out.push(pokemans[usersData[user.id].pokemans[i][0]](usersData[user.id].pokemans[i][1], usersData[user.id].pokemans[i][2], usersData[user.id].pokemans[i][3], user.username));
 		}
 		return out;
 	}
