@@ -335,12 +335,16 @@ module.exports = class Main{
 							if(thisGame.p1.id === author.id){
 								userPokes = thisGame.pokes1;
 								otherPokes = thisGame.pokes2;
+								userPokeN = thisGame.pokeNum1;
+								otherPokeN = thisGame.pokeNum2;
 								userPokeman = userPokes[0];
 								otherPokeman = otherPokes[0];
 								otherUser = thisGame.p2;
 							} else {
 								userPokes = thisGame.pokes2;
 								otherPokes = thisGame.pokes1;
+								userPokeN = thisGame.pokeNum2;
+								otherPokeN = thisGame.pokeNum1;
 								userPokeman = userPokes[0];
 								otherPokeman = otherPokes[0];
 								otherUser = thisGame.p1;
@@ -353,6 +357,7 @@ module.exports = class Main{
 									//we fainted from status D:
 									out += `${userPokes[0].getName()} fainted.\n`;
 									const dead = userPokes.shift();
+									userPokeN.shift();
 									if(userPokes.length === 0){
 										msg.channel.send(`${out}<@${author.id}> ran out of Pokemans. <@${otherUser.id}> made ${thisGame.bet} monies.`, {split: true});
 										moneyModule.increaseBalance(usersData, otherUser, thisGame.bet);
@@ -366,6 +371,7 @@ module.exports = class Main{
 									//they fainted D:
 									out += `${otherPokes[0].getName()} fainted.\n`;
 									const dead = otherPokes.shift();
+									userPokeN.shift();
 									if(otherPokes.length === 0){
 										msg.channel.send(`${out}<@${otherUser.id}> ran out of Pokemans. <@${author.id}> made ${thisGame.bet} monies.`, {split: true});
 										moneyModule.increaseBalance(usersData, author, thisGame.bet);
