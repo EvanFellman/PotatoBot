@@ -140,9 +140,9 @@ module.exports = class Main{
 								msg.reply(`not valid pokeman number.`);
 								return;
 							}
-							pokes.push(ppokes[npokes[i - 1]]);
+							pokes.push(ppokes[npokes[i] - 1]);
 						}
-						games[msg.channel.id][author.id] = {wildBattle: false, invite: true, battle: false, userToInvite: otherUser.id, pokes: pokes, pokeNum: npokes};
+						games[msg.channel.id][author.id] = {wildBattle: false, invite: true, battle: false, bet: parseInt(command[3]), userToInvite: otherUser.id, pokes: pokes, pokeNum: npokes};
 						msg.channel.send(`<@${author.id}> has invited <@${otherUser.id}> to a PokeBattle for ${command[3]} monies.`);
 					}
 				} else {
@@ -167,7 +167,7 @@ module.exports = class Main{
 							msg.reply(`not valid pokeman number.`);
 							return;
 						} else {
-							pokes2.push(ppokes2[npokes2[i]]);
+							pokes2.push(ppokes2[npokes2[i] - 1]);
 						}
 					}
 					const pokes1 = games[msg.channel.id][otherUser.id].pokes;
@@ -183,7 +183,8 @@ module.exports = class Main{
 					//	pokeNum1: PositiveNatural[] this represents an array of numbers which correlates to the pokemans in pokes1
 					//	pokeNum2: PositiveNatural[] this represents an array of numbers which correlates to the pokemans in pokes2
 					//	turn: PositiveNatural this is the id of who's turn it is
-					games[msg.channel.id][otherUser.id] = {wildBattle: false, invite: false, battle: true, turn: null, player1: otherUser, pokes1: pokes1, pokeNum1: npokes1, player2: author, pokes2: pokes2, pokeNum2: npokes2};
+					//	bet: how many monies
+					games[msg.channel.id][otherUser.id] = {wildBattle: false, invite: false, battle: true, turn: null, bet: games[msg.channel.id][otherUser.id].bet, player1: otherUser, pokes1: pokes1, pokeNum1: npokes1, player2: author, pokes2: pokes2, pokeNum2: npokes2};
 					games[msg.channel.id][author.id] = games[msg.channel][otherUser.id];
 					const thisGame = games[msg.channel.id][author.id];
 					const p1 = thisGame.p1;
@@ -228,12 +229,17 @@ module.exports = class Main{
 							if(switchTo >= thisGame.pokeNum1.length){
 								msg.reply(`not a proper PokeNumber`);
 							} else {
-								const tempPoke = thisGame.pokes1[switchTo];
-								const tempNum = thisGame.pokeNum1[switchTo];
-								thisGame.pokes1[switchTo] = thisGame.pokes1[0];
-								thisGame.pokes1[0] = tempPoke;
-								thisGame.pokeNum1[switchTo] = thisGame.pokeNum1[0];
-								thisGame.pokeNum1[0] = tempNum;
+								for(let i = 0; i < thisGame.npokes1.length;i++){
+									if(thisGame.npokes1[i] === switchTo){
+										const tempPoke = thisGame.pokes1[i];
+										const tempNum = thisGame.pokeNum1[i];
+										thisGame.pokes1[i] = thisGame.pokes1[0];
+										thisGame.pokes1[0] = tempPoke;
+										thisGame.pokeNum1[i] = thisGame.pokeNum1[0];
+										thisGame.pokeNum1[0] = tempNum;
+										break;
+									}
+								}
 								msg.channel.send(`<@${p1.id}> has switched to ${thisGame.pokes1[0].getName()}!`);
 								let out = `It is <@${p2.id}>'s turn.\n${thisGame.pokes2[0].getName()}'s health:\n${thisGame.pokes2.printHealthBar()}`;
 								out += `\n\n ${thisGame.pokes1.getName()}'s health:\n${thisGame.pokes1.printHealthBar()}`;
@@ -247,12 +253,17 @@ module.exports = class Main{
 							if(switchTo >= thisGame.pokeNum2.length){
 								msg.reply(`not a proper PokeNumber`);
 							} else {
-								const tempPoke = thisGame.pokes2[switchTo];
-								const tempNum = thisGame.pokeNum2[switchTo];
-								thisGame.pokes2[switchTo] = thisGame.pokes2[0];
-								thisGame.pokes2[0] = tempPoke;
-								thisGame.pokeNum2[switchTo] = thisGame.pokeNum2[0];
-								thisGame.pokeNum2[0] = tempNum;
+								for(let i = 0; i < thisGame.npokes2.length;i++){
+									if(thisGame.npokes2[i] === switchTo){
+										const tempPoke = thisGame.pokes2[i];
+										const tempNum = thisGame.pokeNum2[i];
+										thisGame.pokes2[i] = thisGame.pokes2[0];
+										thisGame.pokes2[0] = tempPoke;
+										thisGame.pokeNum2[i] = thisGame.pokeNum2[0];
+										thisGame.pokeNum2[0] = tempNum;
+										break;
+									}
+								}
 								msg.channel.send(`<@${p2.id}> has switched to ${thisGame.pokes2[0].getName()}!`);
 								let out = `It is <@${p1.id}>'s turn.\n${thisGame.pokes1[0].getName()}'s health:\n${thisGame.pokes1.printHealthBar()}`;
 								out += `\n\n ${thisGame.pokes2.getName()}'s health:\n${thisGame.pokes2.printHealthBar()}`;
@@ -308,6 +319,60 @@ module.exports = class Main{
 						}
 					} else if(games[msg.channel.id][author.id].battle){
 						//Two player battle
+						if(games[msg.channel.id][author.id].turn !== author.id){
+							msg.reply(`it is not your turn.`);
+						} else {
+							const thisGame = games[msg.channel.id][author.id];
+							let userPokes = null;
+							let otherPokes = null;
+							let userPokeman = null;
+							let otherPokeman = null;
+							let otherUser = null;
+							if(thisGame.p1.id === author.id){
+								userPokes = thisGame.pokes1;
+								otherPokes = thisGame.pokes2;
+								userPokeman = userPokes[0];
+								otherPokeman = otherPokes[0];
+								otherUser = thisGame.p2;
+							} else {
+								userPokes = thisGame.pokes2;
+								otherPokes = thisGame.pokes1;
+								userPokeman = userPokes[0];
+								otherPokeman = otherPokes[0];
+								otherUser = thisGame.p1;
+							}
+							if(!isNaN(command[2]) && (parseInt(command[2]) < 1 || parseInt(command[2]) > userPokeman.moves.length)){
+								msg.reply("that is not a valid move number.");
+							} else {
+								let out = `${userPokeman.attack(otherPokeman, parseInt(command[2]) - 1)}\n`;
+								if(userPokeman.health <= 0){
+									//we fainted from status D:
+									const dead = userPokes.shift();
+									if(userPokes.length === 0){
+										msg.channel.send(`${out} <@${author.id}> ran out of Pokemans. <@${otherUser.id}> made ${thisGame.bet} monies.`, {split: true});
+										moneyModule.increaseBalance(usersData, otherUser, thisGame.bet);
+									} else {
+										userPokeman = userPokes[0];
+										out += `It is <@${otherUser.id}>'s turn.\n${otherPokeman.getName()}'s health:\n${otherPokeman.printHealthBar()}`;
+										out += `\n\n ${userPokeman.getName()}'s health:\n${userPokeman.printHealthBar()}`;
+										out += `\nUse \`pokebattle attack <move number>\` to use a move. Or use \`pokebattle switch <pokeNumber>\` to switch to a different pokeman.`;
+										out += `${otherPokeman.printMoves()}`;
+										msg.channel.send(out, {split: true});
+										thisGame.turn = otherUser.id;
+									}
+								} else {
+									//we survived attack status :D
+									if(otherPokeman.health <= 0){
+										//they fainted D:
+										const dead = otherPokes.shift();
+										
+									} else {
+										//they survived :D
+										
+									}
+								}
+							}
+						}
 					}
 				} 
 			} else if(command.length === 2 && (command[1] === "throwball" || command[1] === "throw" || command[1] === "t") && games[msg.channel.id] && games[msg.channel.id][author.id] && games[msg.channel.id][author.id].wildBattle){
