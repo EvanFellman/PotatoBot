@@ -11,6 +11,16 @@ module.exports = class Main{
 		const author = msg.author;
 		if(command.length === 1 && (command[0] === "bal" || command[0] === "b" || command[0] === "balance")){			/* balance command */					
 			msg.reply(`you have ${usersData[author.id].balance} monies.`);
+		} else if(command.length === 3 && (command[0] === "pay" || command[1]== "p")){
+			const otherUser = msg.mentions.members.first();
+			const pay = Math.abs(parseInt(command[2]));
+			if(otherUser.id !== author.id && usersData[author.id].balance >= pay){
+				this.increaseBalance(usersData,otherUser,pay);
+				this.decreaseBalance(usersData,author,pay);
+				msg.channel.send(`${author} payed ${otherUser} ${pay} monies.`);
+			} else {
+				msg.reply(`you do not have enough monies.`);
+			}
 		}
 	}
 
@@ -28,4 +38,10 @@ module.exports = class Main{
 		usersData[user.id].balance += amount;
 		slModule.save(usersData);
 	}
+	decreaseBalance(usersData, user, amount){
+		usersData[user.id].balance -= amount;
+		slModule.save(usersData);
+	}
+
+
 }
