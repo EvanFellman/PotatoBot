@@ -19,6 +19,9 @@ module.exports = class Main{
 	init(user, data){
 		data[user.id].balance = 10;
 	}
+	init(user,stock){
+		data[user.id].stocks = 0;
+	}
 
 	//returns true iff it processes a command.  This will process anything directly involving money.
 	processMessage(msg, command, usersData){
@@ -44,6 +47,33 @@ module.exports = class Main{
 					msg.delete();
 				}
 			}
+		}else if(command[1] === "stocks" || command[1] === 'stock' || command[1] ==='s'){
+			var numStocks = command[2];
+			const cost = this.calculateStockPrice(numStocks);
+			if(command[0] === "buy" || command[0] ==='b'){
+				if(this.getBalance(usersData, author) >= cost){
+					this.buyStocks(usersData,author,numStocks);
+					this.decreaseBalance(usersData,author,cost);
+					msg.channel.send('you bought ' + numStocks + ' for' + cost + ' monies.');
+				}else{
+					msg.channel.send('insufficent balance');
+				}
+			}else if(command[0] ==="sell" || command[0] === 's'){
+				if(usersData[author.id].stocks >= numStocks){
+					this.sellStocks(usersData,author,numStocks);
+					this.increaseBalance(usersData,author,cost);
+					msg.channel.send('you sold '+ numStocks + ' for' + cost +' monies.');
+				}else{
+					msg.channel.send('insufficent stocks');
+				}
+			}else if(command[0] ==="price" || command[0] ===" p"){
+				var singlecost = this.calculateStockPrice(numStocks) / numStocks;
+				msg.channel.send('price of '+ numStocks + ' stocks is ' + cost+ ' monies.');
+				msg.channel.send('price of single stock is ' + singlecost +'  monies.')
+			}else if(command[0] ==="my" || command[0] ==="get"){
+				msg.reply(`you have ${usersData[author.id].stocks} stocks.`);
+			}
+
 		}
 	}
 
@@ -64,6 +94,20 @@ module.exports = class Main{
 	decreaseBalance(usersData, user, amount){
 		usersData[user.id].balance -= amount;
 		slModule.save(usersData);
+	}
+	calculateStockPrice(numStocks){
+		const date = new Date();
+		return Math.round(100 * ((5 * Math.log(numStocks + 1) / Math.log(1.25)) * (1 + Math.abs(5 * (Math.cos(date.getDate() / 2 ) * Math.sin(2 * date.getDay()) * Math.cos(0.25 * date.getMonth())))))) /100;
+	}
+	buyStocks(usersData,user,numStocks){
+		usersData[user.id].stocks += numStocks;
+		
+	}
+	sellStocks(usersData,user,numStocks){
+		usersData[user.id].stocks -=numStocks;
+	}	
+	getStocks(usersData,user){
+		return usersData[user.id].stocks;
 	}
 
 
