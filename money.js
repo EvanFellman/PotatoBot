@@ -18,8 +18,6 @@ module.exports = class Main{
 	//initializes user
 	init(user, data){
 		data[user.id].balance = 10;
-	}
-	init(user,stock){
 		data[user.id].stocks = 0;
 	}
 
@@ -32,8 +30,8 @@ module.exports = class Main{
 			const otherUser = msg.mentions.members.first();
 			const pay = Math.abs(parseInt(command[2]));
 			if(otherUser.id !== author.id && usersData[author.id].balance >= pay){
-				this.increaseBalance(usersData,otherUser,pay);
-				this.decreaseBalance(usersData,author,pay);
+				this.increaseBalance(usersData, otherUser, pay);
+				this.increaseStocks(usersData, author, (-1) * pay);
 				msg.channel.send(`${author} payed ${otherUser} ${pay} monies.`);
 			} else {
 				msg.reply(`you do not have enough monies.`);
@@ -47,31 +45,39 @@ module.exports = class Main{
 					msg.delete();
 				}
 			}
-		}else if(command[1] === "stocks" || command[1] === 'stock' || command[1] ==='s'){
-			var numStocks = command[2];
-			const cost = this.calculateStockPrice(numStocks);
-			if(command[0] === "buy" || command[0] ==='b'){
+		}else if(command.length > 1 && (command[0] === "stocks" || command[0] === 'stock' || command[0] ==='s')){
+			let numStocks = 0;
+			Object.values(usersData).forEach(function(i){
+				numStocks += i.stocks;
+			});
+			if(command.length === 3 && (command[1] === "buy" || command[1] ==='b')){
+				let cost = 0;
+				for(let i = 0; i < parseInt(command[2]); i++){
+					cost += this.calculateStockPrice(i + numStocks);
+				}
 				if(this.getBalance(usersData, author) >= cost){
-					this.buyStocks(usersData,author,numStocks);
-					this.decreaseBalance(usersData,author,cost);
-					msg.channel.send('you bought ' + numStocks + ' for' + cost + ' monies.');
+					this.increaseStocks(usersData, author, parseInt(command[2]));
+					this.increaseBalance(usersData,author, (-1) * cost);
+					msg.channel.send(`<@${author.id}> has purchased ${command[2]} stocks for ${cost} monies.`);
 				}else{
-					msg.channel.send('insufficent balance');
+					msg.reply(`you do not have enough monies.`);
 				}
-			}else if(command[0] ==="sell" || command[0] === 's'){
-				if(usersData[author.id].stocks >= numStocks){
-					this.sellStocks(usersData,author,numStocks);
+			}else if(command.length === 3 && (command[1] ==="sell" || command[1] === 's')){
+				let cost = 0;
+				for(let i = 0; i < parseInt(command[2]); i++){
+					cost += this.calculateStockPrice(numStocks - i);
+				}
+				if(usersData[author.id].stocks >= parseInt(command[2])){
+					this.increaseStocks(usersData, author, (-1) * parseInt(command[2]));
 					this.increaseBalance(usersData,author,cost);
-					msg.channel.send('you sold '+ numStocks + ' for' + cost +' monies.');
+					msg.channel.send(`<@${author.id}> has sold ${command[2]} stocks for ${cost} monies.`);
 				}else{
-					msg.channel.send('insufficent stocks');
+					msg.channel.send('you do not have enough stocks.');
 				}
-			}else if(command[0] ==="price" || command[0] ===" p"){
-				var singlecost = this.calculateStockPrice(numStocks) / numStocks;
-				msg.channel.send('price of '+ numStocks + ' stocks is ' + cost+ ' monies.');
-				msg.channel.send('price of single stock is ' + singlecost +'  monies.')
-			}else if(command[0] ==="my" || command[0] ==="get"){
-				msg.reply(`you have ${usersData[author.id].stocks} stocks.`);
+			}else if(command.length === 2 && (command[1] ==="price" || command[1] ===" p")){
+				msg.channel.send(`The current price of a stock is ${this.calculateStockPrice(numStocks)} monies.`);
+			}else if(command.length === 2 && (command[1] ==="my" || command[1] ==="get" || command[1] === "amount" || command[1] === "a")){
+				msg.reply(`you have ${this.getStocks(usersData, author)} stocks.`);
 			}
 
 		}
@@ -91,24 +97,18 @@ module.exports = class Main{
 		usersData[user.id].balance += amount;
 		slModule.save(usersData);
 	}
-	decreaseBalance(usersData, user, amount){
-		usersData[user.id].balance -= amount;
-		slModule.save(usersData);
-	}
+
 	calculateStockPrice(numStocks){
 		const date = new Date();
-		return Math.round(100 * ((5 * Math.log(numStocks + 1) / Math.log(1.25)) * (1 + Math.abs(5 * (Math.cos(date.getDate() / 2 ) * Math.sin(2 * date.getDay()) * Math.cos(0.25 * date.getMonth())))))) /100;
+		return Math.round(100 * ((5 * Math.log(numStocks + 2) / Math.log(1.25)) * (1 + Math.abs(5 * (Math.cos(date.getDate() / 2 ) * Math.sin(2 * date.getDay()) * Math.cos(0.25 * date.getMonth())))))) /100;
+	
 	}
-	buyStocks(usersData,user,numStocks){
-		usersData[user.id].stocks += numStocks;
-		
+	increaseStocks(usersData, user, amount){
+		usersData[user.id].stocks += amount;
+		slModule.save(usersData);
 	}
-	sellStocks(usersData,user,numStocks){
-		usersData[user.id].stocks -=numStocks;
-	}	
-	getStocks(usersData,user){
+
+	getStocks(usersData, user){
 		return usersData[user.id].stocks;
 	}
-
-
 }
