@@ -14,13 +14,13 @@ addToHelperString("avatar @user", "This will show a person's avatar");
 addToHelperString("pay payment to <@user> amount"," This will pay user money");
 
 //stocks helpstring
-addToHelperString("price stocks numStocks","This gives the price of stocks");
-addToHelperString("buy stocks numStocks","This buys the numStocks");
-addToHelperString("sell stocks numStocks","This sells the numStocks");
-addToHelperString("get/my stocks", " This tells how many stocks you have");
+addToHelperString("stocks price","This gives the price of buying and selling a stock");
+addToHelperString("stocks buy <numStocks>","This buys numStocks stocks");
+addToHelperString("stocks sell <numStocks>","This sells numStocks stocks");
+addToHelperString("stocks amount", "Shows how many stocks you have");
 
 //pokeman helperstring
-addToHelperString("buy pokeballs <amount>", "This will buy <amount> pokeballs");
+addToHelperString("pokeballs buy <amount>", "This will buy <amount> pokeballs");
 addToHelperString("pokeballs price", "This will show the price of a pokeball");
 addToHelperString("pokebattle list", "This will list all of the pokemans you have");
 addToHelperString("pokebattle info <pokeNumber or name>", "This will show information about either the pokeman of <pokeNumber> or about <name>");

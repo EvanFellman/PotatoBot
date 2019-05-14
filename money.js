@@ -25,10 +25,10 @@ module.exports = class Main{
 	processMessage(msg, command, usersData){
 		const author = msg.author;
 		if(command.length === 1 && (command[0] === "bal" || command[0] === "b" || command[0] === "balance")){			/* balance command */					
-			msg.reply(`you have ${usersData[author.id].balance} monies.`);
+			msg.reply(`you have ${Math.round(usersData[author.id].balance * 100) / 100} monies.`);
 		} else if(command.length === 3 && (command[0] === "pay" || command[1]== "p")){
 			const otherUser = msg.mentions.members.first();
-			const pay = Math.abs(parseInt(command[2]));
+			const pay = Math.abs(paseFloat(command[2]));
 			if(otherUser.id !== author.id && usersData[author.id].balance >= pay){
 				this.increaseBalance(usersData, otherUser, pay);
 				this.increaseStocks(usersData, author, (-1) * pay);
@@ -58,7 +58,7 @@ module.exports = class Main{
 				if(this.getBalance(usersData, author) >= cost){
 					this.increaseStocks(usersData, author, parseInt(command[2]));
 					this.increaseBalance(usersData,author, (-1) * cost);
-					msg.channel.send(`<@${author.id}> has purchased ${command[2]} stocks for ${cost} monies.`);
+					msg.channel.send(`<@${author.id}> has purchased ${command[2]} stocks for ${Math.round(100 * cost) / 100} monies.`);
 				}else{
 					msg.reply(`you do not have enough monies.`);
 				}
@@ -70,12 +70,12 @@ module.exports = class Main{
 				if(usersData[author.id].stocks >= parseInt(command[2])){
 					this.increaseStocks(usersData, author, (-1) * parseInt(command[2]));
 					this.increaseBalance(usersData,author,cost);
-					msg.channel.send(`<@${author.id}> has sold ${command[2]} stocks for ${cost} monies.`);
+					msg.channel.send(`<@${author.id}> has sold ${command[2]} stocks for ${Math.round(100 * cost) / 100} monies.`);
 				}else{
 					msg.channel.send('you do not have enough stocks.');
 				}
 			}else if(command.length === 2 && (command[1] ==="price" || command[1] ===" p")){
-				msg.channel.send(`The current price of a stock is ${this.calculateStockPrice(numStocks)} monies.`);
+				msg.channel.send(`The current price of a stock is ${Math.round(100 * this.calculateStockPrice(numStocks)) / 100} monies.`);
 			}else if(command.length === 2 && (command[1] ==="my" || command[1] ==="get" || command[1] === "amount" || command[1] === "a")){
 				msg.reply(`you have ${this.getStocks(usersData, author)} stocks.`);
 			}

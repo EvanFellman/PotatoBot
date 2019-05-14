@@ -18,9 +18,9 @@ module.exports = class Main{
 	//returns true iff it processes a command.  This will process anything directly involving money.
 	processMessage(msg, command, usersData){
 		const author = msg.author;
-		if(command.length === 3 && (command[0] === "buy" || command[0] === "b") && 
-				(command[1] === "balls" || command[1] === "ball" || command[1] === "b" 
-				|| command[1] === "pokeball" || command[1] === "pokeballs" || command[1] === "p")){
+		if(command.length === 3 && (command[1] === "buy" || command[1] === "b") && 
+				(command[0] === "balls" || command[0] === "ball" || command[0] === "b" 
+				|| command[0] === "pokeball" || command[0] === "pokeballs")){
 			const amountToBuy = parseInt(command[2]);
 			if(POKEBALL_PRICE * amountToBuy > usersData[author.id].balance){
 				msg.reply(`you cannot afford this. The price of a pokeball is ${POKEBALL_PRICE} monies.`);
