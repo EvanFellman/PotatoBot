@@ -11,7 +11,7 @@ addToHelperString("Create Account", "This will initialize your potato account");
 addToHelperString("bal", "Shows your balance");
 addToHelperString("funny picture", "Shows a random funny photo");
 addToHelperString("avatar @user", "This will show a person's avatar");
-addToHelperString("pay payment to <@user> amount"," This will pay user money");
+addToHelperString("pay @user <amount>"," This will pay @user amount monies");
 
 //stocks helpstring
 addToHelperString("stocks price","This gives the price of buying and selling a stock");
