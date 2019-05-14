@@ -26,7 +26,7 @@ module.exports = class Main{
 		const author = msg.author;
 		if(command.length === 1 && (command[0] === "bal" || command[0] === "b" || command[0] === "balance")){			/* balance command */					
 			msg.reply(`you have ${Math.round(usersData[author.id].balance * 100) / 100} monies.`);
-		} else if(command.length === 3 && (command[0] === "pay" || command[0]== "p")){
+		} else if(command.length === 3 && (command[0] === "pay" || command[0] === "p")){
 			const otherUser = msg.mentions.members.first();
 			const pay = Math.abs(paseFloat(command[2]));
 			if(otherUser.id !== author.id && usersData[author.id].balance >= pay){
