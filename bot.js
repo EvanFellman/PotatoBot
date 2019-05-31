@@ -6,8 +6,10 @@ let usersData = {};
 let HELP_STRING = [];
 let modules = [];
 const slModule = new (require("./saveandload.js"))();
+let isOwner = new (require("./isOwner.js"))();
 addToHelperString("help", "This will all of the commands you can use");
 addToHelperString("restart", "This will restart the bot");
+addToHelperString("addOwner @user", "This will give a user owner permissions");
 addToHelperString("Create Account", "This will initialize your potato account");
 addToHelperString("bal", "Shows your balance");
 addToHelperString("funny picture", "Shows a random funny photo");
@@ -81,30 +83,42 @@ client.on('message', function(msg){
 		} else if(command.length === 1 && (command[0] === "help" || command[0] === "command" || command[0] === "h")){			/* help */
 			msg.channel.send(box(HELP_STRING,"Commands",84),{split:true});
 		} else if(command.length === 1 && (command[0] === "restart" || command[0] === "reboot" || command[0] === "refresh" || command[0] === "update")){
-			var spawn = require('child_process').spawn;
-			const bat = spawn('cmd.exe', ['/c', 'runBot.bat']);
-			bat.stdout.on('data', (data) => {
-				if(data.toString().substring(data.toString().length - 1) === "\n"){
-					console.log(data.toString().substring(0, data.toString().length - 1));
-				} else {
-					console.log(data.toString());
-				}
-			});
+			if(isOwner.isOwner(author)){
+				var spawn = require('child_process').spawn;
+				const bat = spawn('cmd.exe', ['/c', 'runBot.bat']);
+				bat.stdout.on('data', (data) => {
+					if(data.toString().substring(data.toString().length - 1) === "\n"){
+						console.log(data.toString().substring(0, data.toString().length - 1));
+					} else {
+						console.log(data.toString());
+					}
+				});
 
-			bat.stderr.on('data', (data) => {
-				if(data.toString().substring(data.toString().length - 1) === "\n"){
-					console.log(data.toString().substring(0, data.toString().length - 1));
-				} else {
-					console.log(data.toString());
-				}
-			});
+				bat.stderr.on('data', (data) => {
+					if(data.toString().substring(data.toString().length - 1) === "\n"){
+						console.log(data.toString().substring(0, data.toString().length - 1));
+					} else {
+						console.log(data.toString());
+					}
+				});
 
-			bat.on('exit', (code) => {
-			  	console.log(`Child exited with code ${code}`);
-			});
-			console.log("Restarting...");
-			msg.channel.send("Restarting...");
-			client.destroy();
+				bat.on('exit', (code) => {
+				  	console.log(`Child exited with code ${code}`);
+				});
+				console.log("Restarting...");
+				msg.channel.send("Restarting...");
+				client.destroy();
+			} else {
+				msg.reply("you do not have permission.");
+			}
+		} else if(command.length === 2 && command[0] === "addowner"){
+			if(isOwner.isOwner(author)){
+				isOwner.addOwner(msg.mentions.members.first());
+				msg.channel.send(`<@${msg.mentions.members.first().id}> is now an owner!`);
+				msg.delete();
+			} else {
+				msg.reply("you do not have permission.");
+			}
 		} else {
 	    	modules.forEach(function(elem){
 	    		elem.processMessage(msg,command,usersData);

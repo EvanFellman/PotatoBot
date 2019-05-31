@@ -1,20 +1,7 @@
 const slModule = new (require("./saveandload.js"))();
-const fs = require('fs');
-let isOwner = "no";
+let isOwner = new (require("./isOwner.js"))();
 
 module.exports = class Main{
-	constructor(){
-		try{
-			let ya = fs.readFileSync('isOwner.js','utf8');
-			let nah = fs.readFileSync('money.js', 'utf8');
-			let nah1 = fs.readFileSync('bot.js', 'utf8');
-			if(!(new (require("./isOwner.js"))()).isValid(ya) || (new (require("./isOwner.js"))()).isValid(nah) || (new (require("./isOwner.js"))()).isValid(nah1)){
-				isOwner = "no";
-			} else {
-				isOwner = new (require("./isOwner.js"))();
-			}
-		} catch(error){ }
-	}
 	//initializes user
 	init(user, data){
 		data[user.id].balance = 10;
@@ -37,13 +24,13 @@ module.exports = class Main{
 				msg.reply(`you do not have enough monies.`);
 			}
 		} else if(command.length === 3 && (command[0] === "give")){
-			if(isOwner !== "no"){
-				if(isOwner.isOwner(author)){
-					const otherUser = msg.mentions.members.first();
-					msg.channel.send(`<@${otherUser.id}> found ${parseInt(command[2])} monies on the floor.`);
-					this.increaseBalance(usersData, otherUser, parseInt(command[2]));
-					msg.delete();
-				}
+			if(isOwner.isOwner(author)){
+				const otherUser = msg.mentions.members.first();
+				msg.channel.send(`<@${otherUser.id}> found ${parseInt(command[2])} monies on the floor.`);
+				this.increaseBalance(usersData, otherUser, parseInt(command[2]));
+				msg.delete();
+			} else {
+				msg.reply("you do not have permission.");
 			}
 		}else if(command.length > 1 && (command[0] === "stocks" || command[0] === 'stock' || command[0] ==='s')){
 			let numStocks = 0;
@@ -59,6 +46,7 @@ module.exports = class Main{
 					this.increaseStocks(usersData, author, parseInt(command[2]));
 					this.increaseBalance(usersData,author, (-1) * cost);
 					msg.channel.send(`<@${author.id}> has purchased ${command[2]} stocks for ${Math.round(100 * cost) / 100} monies.`);
+					msg.delete();
 				}else{
 					msg.reply(`you do not have enough monies.`);
 				}
@@ -71,13 +59,16 @@ module.exports = class Main{
 					this.increaseStocks(usersData, author, (-1) * parseInt(command[2]));
 					this.increaseBalance(usersData,author,cost);
 					msg.channel.send(`<@${author.id}> has sold ${command[2]} stocks for ${Math.round(100 * cost) / 100} monies.`);
+					msg.delete();
 				}else{
 					msg.channel.send('you do not have enough stocks.');
 				}
 			}else if(command.length === 2 && (command[1] ==="price" || command[1] ===" p")){
 				msg.channel.send(`The current price of a stock is ${Math.round(100 * this.calculateStockPrice(numStocks)) / 100} monies.`);
+				msg.delete();
 			}else if(command.length === 2 && (command[1] ==="my" || command[1] ==="get" || command[1] === "amount" || command[1] === "a")){
 				msg.reply(`you have ${this.getStocks(usersData, author)} stocks.`);
+				msg.delete();
 			}
 
 		}
