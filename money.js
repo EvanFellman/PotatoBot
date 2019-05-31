@@ -21,7 +21,7 @@ module.exports = class Main{
 		data[user.id].stocks = 0;
 	}
 
-	//returns true iff it processes a command.  This will process anything directly involving money.
+	//rocesses a command.  This will process anything directly involving money.
 	processMessage(msg, command, usersData){
 		const author = msg.author;
 		if(command.length === 1 && (command[0] === "bal" || command[0] === "b" || command[0] === "balance")){			/* balance command */					

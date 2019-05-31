@@ -7,6 +7,7 @@ let HELP_STRING = [];
 let modules = [];
 const slModule = new (require("./saveandload.js"))();
 addToHelperString("help", "This will all of the commands you can use");
+addToHelperString("restart", "This will restart the bot");
 addToHelperString("Create Account", "This will initialize your potato account");
 addToHelperString("bal", "Shows your balance");
 addToHelperString("funny picture", "Shows a random funny photo");
@@ -77,43 +78,40 @@ client.on('message', function(msg){
 			}
 		} else if(!isUserInitialized(author)){
 			msg.reply("you do not have a Potato Account. To make a Potato Account run `" + STARTER + "Create Account`");
-		} else if(command[0] === "help" || command[0] === "command" || command[0] === "h"){			/* help */
+		} else if(command.length === 1 && (command[0] === "help" || command[0] === "command" || command[0] === "h")){			/* help */
 			msg.channel.send(box(HELP_STRING,"Commands",84),{split:true});
-		} else if(command[0] === "funny" || command[0] === "f"){									/* funny command (right now its only pictures) */
-			if(command.length !== 2){
-				msg.reply("you did not run this command correctly.");
-			} else if(command[1] === "p" || command[1] === "picture" || command[1] === "pictures" || command[1] === "pics" || command[1] === "pic" || command[1] === "photo" || command[1] === "photos"){
-				fs.readdir("./funnyPics", (err, files) => {
-					if(files === undefined || files.length === 0){
-						msg.channel.send("Sorry I don't have any funny photos");
-						console.log("I don't have any funny photos :(");
-					} else {
-						msg.channel.send("", {file: "funnyPics/" + randomString(files)});
-					}
-				});
-			}
-		} else if(command[0] === "avatar"){															/* shows a user's avatar */
-	      let otherUser = msg.mentions.users.first();
-	      msg.channel.send("", {file: otherUser.displayAvatarURL.substring(0, otherUser.displayAvatarURL.length - 9)});
-	    } else {
+		} else if(command.length === 1 && (command[0] === "restart" || command[0] === "reboot" || command[0] === "refresh" || command[0] === "update")){
+			var spawn = require('child_process').spawn;
+			const bat = spawn('cmd.exe', ['/c', 'runBot.bat']);
+			bat.stdout.on('data', (data) => {
+				if(data.toString().substring(data.toString().length - 1) === "\n"){
+					console.log(data.toString().substring(0, data.toString().length - 1));
+				} else {
+					console.log(data.toString());
+				}
+			});
+
+			bat.stderr.on('data', (data) => {
+				if(data.toString().substring(data.toString().length - 1) === "\n"){
+					console.log(data.toString().substring(0, data.toString().length - 1));
+				} else {
+					console.log(data.toString());
+				}
+			});
+
+			bat.on('exit', (code) => {
+			  	console.log(`Child exited with code ${code}`);
+			});
+			console.log("Restarting...");
+			msg.channel.send("Restarting...");
+			client.destroy();
+		} else {
 	    	modules.forEach(function(elem){
 	    		elem.processMessage(msg,command,usersData);
 	    	});
-	    	
 	    }
 	} 
 });
-
-/* returns a random string from the input (an array of strings) */
-function randomString(stringArray){
-	const random = Math.random() * stringArray.length;
-	for(let i = 0; i < stringArray.length; i++){
-		if(random < i + 1){
-			return stringArray[i];
-		}
-	}
-	return stringArray[stringArray.length - 1];
-}
 
 /*  stringArray is a list of strings.  Each element in this array is its own line (DONT put \n in the string just make it a new element)
  *  title is the title

@@ -15,7 +15,7 @@ module.exports = class Main{
 		data[user.id].pokeBalls = 0;
 	}
 
-	//returns true iff it processes a command.  This will process anything directly involving money.
+	//processes a message
 	processMessage(msg, command, usersData){
 		const author = msg.author;
 		if(command.length === 3 && (command[1] === "buy" || command[1] === "b") && 
