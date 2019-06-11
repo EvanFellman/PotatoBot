@@ -1,83 +1,93 @@
 const moneyModule = new (require("./money.js"))();
 const horseRace = {};
+const bet ={};
 let HELP_STRING = [];
-addToHelperString("horse1S","horse1Pe","horse1P");
 
 module.exports = class Main{
-//addToHelperString( "horse1S","horse1Pe","horse1P");	
-	init(winningHorse, data) { }
-	processMessage(msg,command,horserace){
+	init(user,bet){ 
+		bet[user.id].horses = [];
+		bet[user.id].bets = 0;
+	} 
+	init(horse,horseRace){
+		horseRace[horse].speed = [];
+		horseRace[horse].win = 0;
+	}
+	processMessage(msg,command,horseRace){
 		const author = msg.author;
-		//const horse1S = calculateHorseSpeed(horse1);
-		//const horse1P = calculateProfit(horse1);
-		//const horse1Pe = calculateWinningPercentage(horse1);
-		if(command[0] === "horserace"|| command[0] === "hr"){
-			if(command[1] === "start" || command[1] === "st "|| command[1] === "s"){
-				msg.channel.send(calculateHorseSpeed(horse));
-				msg.channel.send(";");
-			}
-
-		}
+		const speed1 = calculatespeed(horse1);
+		if(command[0] === "horseRace" || command[0] === "hr" && command[1] === "create" || command[1] === "c"){
+		
+			msg.channel.send(speed1);
+			msg.channel.send("initialising new game. Place your bets");
+			msg.channel.send(";1");
+			
+			
+			// also need to send the table giving out informatione
+		}else if(command[0] === "horseRace" || command[0] === "hr" && command[1] === "bets" || command[1] === "b"){
+			msg.channel.send(";2");
+			let bet = command[2];
+			let horse = command[3];
+			//this.betmoney(bet,author,bet);
+			this.increaseBalance(usersData,author,(-1)*amount);
+		}else if(command[0] === "horseRace" || command[0] ==="hr" && command[1] === "start" || command [1] ==="s"){
+			// calculate the winning horse
+			msg.channel.send(";3");
+		}		
 	}
-	calculateHorseSpeed(horse){
-		Math.random('100','150','185','200','145','215','230','250','300','325','400','450','700','500','800');
+	//betmoney(bet,user,amount){
+	  // bet[user.id].bets = amount;
+    //}
+    calculatespeed(horse){
+    	horseRace[horse].speed = getRandomInt(0,20);
+    }
+    getRandomInt(min, max) {
+  		min = Math.ceil(min);
+ 		max = Math.floor(max);
+ 		return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
 	}
-	calculateWinningPercentage(horse){
-		let speed = calculateHorseSpeed(horse);
+    calculatechancesofwinning(horse,speed){
+    	let speed = calculateHorseSpeed(horse);
 		return speed / totalspeed() * 100;
-
-	}
-	totalspeed(){
+    }
+    totalspeed(){
 		return calculateHorseSpeed(horse1) + calculateHorseSpeed(horse2) + calculateHorseSpeed(horse3) + calculateHorseSpeed(horse4) + calculateHorseSpeed(horse5);
 	}
-	calculateProfit(horse){
-		let money = calculateWinningPercentage(horse);
-		return money * 0.15;
+	calcthechance(){
+		let speed = []//array of all speeds.// sort in ascending order
+		let number = getRandomInt(0,1);
+		if(number <= 0.35){
+			return speed[0];
+		}else if( number > 0.35 && number <0.60){
+			return speed[1];
+		}else if(number >0.60 && number < 0.80){
+			return speed[2];
+		}else if(number >0.80 && number <0.93){
+			return speed[3];
+		}else{
+			return speed[4];
+		}
+		// caiculating a biased random chance
+	}
+	calculatewinninghorse(){
+		let try1 = calculatewinninghorse();
+		let try2 = calculatewinninghorse();
+		let try3 = calculatewinninghorse();
+		let winner = 0;
+		if(try1 = try2 && try2 = try3){
+			winner = try 1;
+		}else if(try1 = try2){
+			winner =  try1;
+		}else if(try2 = try3){
+			winner = try2;
+		}else if(try3 = try1){
+			winner =  try3;
+		}else{
+			winner = 0;
+		}
 	}
 }
-function box(stringArray, title="", width=0){      //creates a box of text
-		let maxLen = width;
-		if(maxLen < title.length + 3){
-		   maxLen = title.length + 3;
-		}
-		for(let i = 0; i < stringArray.length; i++){
-		   if(stringArray[i].length > maxLen){
-		     maxLen = stringArray[i].length + 1;
-		   }
-		}
-		let out = "";
-		 if(title !== ""){
-		   out += "`";
-		for(let i = 0; i < ((maxLen - title.length) / 2); i ++){
-		    out += "~";
-		}
-		out += " " + title + " ";
-		for(let i = out.length; i < maxLen + 3; i ++){
-		    out += "~";
-		}
-		out += "`";
-		}
-		  for(let i = 0; i < stringArray.length; i++){
-		    if(i === 0)
-		      out += "\n`|"
-		    else 
-		      out += "|`\n`|"
-		    out += stringArray[i];
-		    for(let j = stringArray[i].length; j < maxLen; j++){
-		      out += " ";
-		    }
-		}
-		return out + "|`"; 
-	}
-function addToHelperString(func1,func2,func3){
-	if(HELP_STRING.length > 0)
-	   HELP_STRING.push("");
-	//HELP_STRING.push(func0);
-	HELP_STRING.push(func1);
-	HELP_STRING.push(func2);
-	HELP_STRING.push(func3);
-	
-}
+
+
 
 
 
