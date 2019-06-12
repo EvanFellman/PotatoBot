@@ -4,6 +4,11 @@ module.exports = class Main{
 	//initializes user
 	init(user, data){	}
 
+	//helperCommand
+	help(){
+		return {};
+	}
+
 	//processes a message
 	processMessage(msg, command, usersData){	}
 

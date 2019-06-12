@@ -8,7 +8,18 @@ module.exports = class Main{
 		data[user.id].stocks = 0;
 	}
 
-	//rocesses a command.  This will process anything directly involving money.
+	//helperCommand
+	help(){
+		return {"money": [["balance", "Shows your balance"],
+						  ["pay @user <amount>"," This will pay @user amount monies"]],
+				"owner": [["give @user <amount>", "This will give @user amount monies"]],
+				"stocks": [["stocks price","This gives the price of buying and selling a stock"],
+						   ["stocks buy <numStocks>","This buys numStocks stocks"],
+						   ["stocks sell <numStocks>","This sells numStocks stocks"],
+						   ["stocks amount", "Shows how many stocks you have"]]};
+	}
+
+	//processes a command.  This will process anything directly involving money.
 	processMessage(msg, command, usersData){
 		const author = msg.author;
 		if(command.length === 1 && (command[0] === "bal" || command[0] === "b" || command[0] === "balance")){			/* balance command */					

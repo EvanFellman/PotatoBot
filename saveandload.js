@@ -4,6 +4,11 @@ module.exports = class Main{
 	//initializes user
 	init(user, data){	}
 
+	//helperCommand
+	help(){
+		return {};
+	}
+
 	//returns true iff it processes a command.  This will process anything directly involving money.
 	processMessage(msg, command, usersData){	}
 

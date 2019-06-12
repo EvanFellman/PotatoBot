@@ -37,6 +37,14 @@ module.exports = class Main{
 		horseRace[horse].speed = [];
 		horseRace[horse].win = 0;
 	}
+
+	//I have to insert this so it wont bust
+	//helperCommand
+	help(){
+		return {};
+	}
+
+
 	processMessage(msg,command,horseRace){
 		const author = msg.author;
 

@@ -3,37 +3,16 @@ const client = new Discord.Client();
 const fs = require('fs');
 const STARTER = ';';
 let usersData = {};
-let HELP_STRING = [];
+
+//Each key is a topic and the value of it is an array of strings that represents a box
+let helpCommands = {"owner": [["restart", "This will restart the bot"],
+							  ["addOwner @user", "This will give a user owner permissions"],
+							  ["modules list", "This will list what modules are active"],
+							  ["modules flip <module name>", "This will turn a module on or off"]]};
 let modules = [];
 const moduleSwitches = JSON.parse(fs.readFileSync("./moduleSwitches.txt"));
 const slModule = new (require("./saveandload.js"))();
 let isOwner = new (require("./isOwner.js"))();
-addToHelperString("help", "This will all of the commands you can use");
-addToHelperString("restart", "This will restart the bot");
-addToHelperString("addOwner @user", "This will give a user owner permissions");
-addToHelperString("modules list", "This will list what modules are active");
-addToHelperString("modules flip <module name>", "This will turn a module on or off");
-addToHelperString("create Account", "This will initialize your potato account");
-addToHelperString("bal", "Shows your balance");
-addToHelperString("funny picture", "Shows a random funny photo");
-addToHelperString("avatar @user", "This will show a person's avatar");
-addToHelperString("pay @user <amount>"," This will pay @user amount monies");
-
-//stocks helpstring
-addToHelperString("stocks price","This gives the price of buying and selling a stock");
-addToHelperString("stocks buy <numStocks>","This buys numStocks stocks");
-addToHelperString("stocks sell <numStocks>","This sells numStocks stocks");
-addToHelperString("stocks amount", "Shows how many stocks you have");
-
-//pokeman helperstring
-addToHelperString("pokeballs buy <amount>", "This will buy <amount> pokeballs");
-addToHelperString("pokeballs price", "This will show the price of a pokeball");
-addToHelperString("pokebattle list", "This will list all of the pokemans you have");
-addToHelperString("pokebattle info <pokeNumber or name>", "This will show information about either the pokeman of <pokeNumber> or about <name>");
-addToHelperString("pokebattle starter", "This will give you a starter pokeman");
-addToHelperString("pokebattle wildbattle <pokeNumber> <monies>", "Starts a battle against a wild pokeman with bet of <monies> monies and <pokeNumber> pokeman");
-addToHelperString("pokebattle attack <moveNumber>", "Your pokeman will use <moveNumber> move");
-addToHelperString("pokebattle throwball", "Throw a pokeball to try to catch a pokeman");
 /* read the token from token.txt */
 fs.readFile('token.txt', function(err,txt){
 	fs.readdir('.', function(error,files){
@@ -41,7 +20,16 @@ fs.readFile('token.txt', function(err,txt){
 			usersData = data;
 			for(var i = 0; i < files.length;i++){
 				if(files[i].substring(files[i].length-3) === '.js' && files[i] !== "bot.js"){  // looks over the files having js and adds them in modules
-					modules.push({name: files[i], module: new (require("./" + files[i]))()});
+					let m = new (require("./" + files[i]))();
+					modules.push({name: files[i], module: m});
+					let h = m.help();
+					for(let i = 0; i < Object.keys(h).length; i++){
+						if(!(Object.keys(h)[i] in helpCommands)){
+							helpCommands[Object.keys(h)[i]] = Object.values(h)[i];
+						} else {
+							helpCommands[Object.keys(h)[i]] = helpCommands[Object.keys(h)[i]].concat(Object.values(h)[i]);
+						}
+					}
 				}
 			}
 			console.log("Logging in...");
@@ -89,8 +77,24 @@ client.on('message', function(msg){
 			}
 		} else if(!isUserInitialized(author)){
 			msg.reply("you do not have a Potato Account. To make a Potato Account run `" + STARTER + "Create Account`");
-		} else if(command.length === 1 && (command[0] === "help" || command[0] === "command" || command[0] === "h")){			/* help */
-			msg.channel.send(box(HELP_STRING,"Commands",84),{split:true});
+		} else if((command.length === 1 || command.length === 2) && (command[0] === "help" || command[0] === "command" || command[0] === "h")){			/* help */
+			if(command.length === 1){
+				let out = [];
+				for(let i = 0; i < Object.keys(helpCommands).length; i++){
+					out.push(Object.keys(helpCommands)[i]);
+				}
+				msg.channel.send("use ;help <topic> to get more info about that topic\nuse ;create account to create an account\n" + box(out, "Topics"), {split:true});
+			} else if(!(command[1] in helpCommands)){
+				msg.channel.send("This is not a topic that I can help with.");
+			} else {
+				let out = [];
+				for(let i = 0; i < helpCommands[command[1]].length; i++){
+					out.push("");
+					out.push(helpCommands[command[1]][i][0]);
+					out.push("--" + helpCommands[command[1]][i][1]);
+				}
+				msg.channel.send(box(out, command[1] + " commands", 84), {split:true});
+			}
 		} else if(command.length === 1 && (command[0] === "restart" || command[0] === "reboot" || command[0] === "refresh" || command[0] === "update")){
 			if(isOwner.isOwner(author)){
 				var spawn = require('child_process').spawn;
@@ -207,7 +211,12 @@ function box(stringArray, title="", width=0){      //creates a box of text
       out += " ";
     }
   }
-  return out + "|`";
+  out += "|`\n`";
+  for(let i = 0; i < maxLen + 2; i++){
+  	out += "~";
+  }
+  out += "`";
+  return out;
 }
 
 /*  This is for the developer to allow to easily add a command and description of the command to the help printout */ 

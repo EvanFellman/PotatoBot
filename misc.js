@@ -4,6 +4,12 @@ module.exports = class Main{
 	//initializes user
 	init(user, data){	}
 
+	//helperCommand
+	help(){
+		return {"misc": [["funny picture", "Shows a random funny photo"],
+						 ["avatar @user", "This will show a person's avatar"]]};
+	}
+
 	//processes a message
 	processMessage(msg, command, usersData){
 		if(command[0] === "funny" || command[0] === "f"){									/* funny command (right now its only pictures) */

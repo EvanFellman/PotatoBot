@@ -15,6 +15,18 @@ module.exports = class Main{
 		data[user.id].pokeBalls = 0;
 	}
 
+	//helperCommand
+	help(){
+		return {"pokeman": [["pokeballs buy <amount>", "This will buy <amount> pokeballs"],
+							["pokeballs price", "This will show the price of a pokeball"],
+							["pokebattle list", "This will list all of the pokemans you have"],
+							["pokebattle info <pokeNumber or name>", "This will show information about either the pokeman of <pokeNumber> or about <name>"],
+							["pokebattle starter", "This will give you a starter pokeman"],
+							["pokebattle wildbattle <pokeNumber> <monies>", "Starts a battle against a wild pokeman with bet of <monies> monies and <pokeNumber> pokeman"],
+							["pokebattle attack <moveNumber>", "Your pokeman will use <moveNumber> move"],
+							["pokebattle throwball", "Throw a pokeball to try to catch a pokeman"]]};
+	}
+
 	//processes a message
 	processMessage(msg, command, usersData){
 		const author = msg.author;
@@ -817,7 +829,12 @@ function box(stringArray, title="", width=0){      //creates a box of text
       out += " ";
     }
   }
-  return out + "|`";
+  out += "|`\n`";
+  for(let i = 0; i < maxLen + 2; i++){
+  	out += "~";
+  }
+  out += "`";
+  return out;
 }
 //				new Type(typeName: String, weakness: String[]);
 types["fire"] = new Type("fire", ["water","rock"]);
