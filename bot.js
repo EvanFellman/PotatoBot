@@ -5,12 +5,15 @@ const STARTER = ';';
 let usersData = {};
 let HELP_STRING = [];
 let modules = [];
+const moduleSwitches = JSON.parse(fs.readFileSync("./moduleSwitches.txt"));
 const slModule = new (require("./saveandload.js"))();
 let isOwner = new (require("./isOwner.js"))();
 addToHelperString("help", "This will all of the commands you can use");
 addToHelperString("restart", "This will restart the bot");
 addToHelperString("addOwner @user", "This will give a user owner permissions");
-addToHelperString("Create Account", "This will initialize your potato account");
+addToHelperString("modules list", "This will list what modules are active");
+addToHelperString("modules flip <module name>", "This will turn a module on or off");
+addToHelperString("create Account", "This will initialize your potato account");
 addToHelperString("bal", "Shows your balance");
 addToHelperString("funny picture", "Shows a random funny photo");
 addToHelperString("avatar @user", "This will show a person's avatar");
@@ -38,7 +41,7 @@ fs.readFile('token.txt', function(err,txt){
 			usersData = data;
 			for(var i = 0; i < files.length;i++){
 				if(files[i].substring(files[i].length-3) === '.js' && files[i] !== "bot.js"){  // looks over the files having js and adds them in modules
-					modules.push(new (require("./" + files[i]))());
+					modules.push({name: files[i], module: new (require("./" + files[i]))()});
 				}
 			}
 			console.log("Logging in...");
@@ -73,6 +76,12 @@ client.on('message', function(msg){
 			} else {
 				usersData[author.id] = {};
 				modules.forEach(function(elem){
+					if(!(elem.name in moduleSwitches)){
+		    			moduleSwitches[elem.name] = true;
+			    		fs.writeFileSync("./moduleSwitches.txt",JSON.stringify(moduleSwitches));
+		    		} else if(!moduleSwitches[elem.name]){
+		    			return;
+		    		}
 					elem.init(author, usersData);
 				});
 				slModule.save(usersData);
@@ -119,9 +128,43 @@ client.on('message', function(msg){
 			} else {
 				msg.reply("you do not have permission.");
 			}
+		} else if(command.length >= 2 && command[0] === "modules"){
+			if(command.length === 2 && command[1] === "list"){
+				let arr = [];
+				for(let i = 0; i < Object.keys(moduleSwitches).length; i++){
+					let space = "";
+					for(let j = Object.keys(moduleSwitches)[i].length; j < 25; j++){
+						space += " ";
+					}
+					arr.push(Object.keys(moduleSwitches)[i] + space + Object.values(moduleSwitches)[i])
+				}
+				msg.channel.send(box(arr, "Modules"));
+			} else if(command.length === 3 && command[1] === "flip"){
+				if(!isOwner.isOwner(author)){
+					msg.reply(`you do not have permission.`);
+				} else {
+					if(command[2].length < 3 || command[2].substring(command[2].length - 3) !== ".js"){
+						command[2] += ".js";
+					}
+					for(let i = 0; i < Object.keys(moduleSwitches).length; i++){
+						if(Object.keys(moduleSwitches)[i].toLowerCase() === command[2]){
+							let temp = !moduleSwitches[command[2]];
+							moduleSwitches[command[2]] = !moduleSwitches[command[2]];
+							msg.channel.send(`${command[2]} is set to ${temp}.`);
+							fs.writeFileSync("./moduleSwitches.txt", JSON.stringify(moduleSwitches));
+						}
+					}
+				}
+			}
 		} else {
 	    	modules.forEach(function(elem){
-	    		elem.processMessage(msg,command,usersData);
+	    		if(!(elem.name in moduleSwitches)){
+		    		moduleSwitches[elem.name] = true;
+			    	fs.writeFileSync("./moduleSwitches.txt",JSON.stringify(moduleSwitches));
+	    		} else if(!moduleSwitches[elem.name]){
+	    			return;
+	    		}
+	    		elem.module.processMessage(msg,command,usersData);
 	    	});
 	    }
 	} 
