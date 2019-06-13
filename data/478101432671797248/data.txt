@@ -1,0 +1,1 @@
+{"balance":9936.640000000001,"pokemans":[["Yah Yeet",2,1,{"healthStat":100,"attackStat":16,"defenseStat":99,"speedStat":93}],["Dog",2,0,{"healthStat":54,"attackStat":97,"defenseStat":10,"speedStat":6}],["Yah Yeet",1,0,{"healthStat":51,"attackStat":19,"defenseStat":44,"speedStat":58}]],"pokeBalls":1,"stocks":0}

@@ -13,6 +13,9 @@ module.exports = class Main{
 	processMessage(msg, command, usersData){	}
 
 	save(user, data){
+		if(!fs.existsSync("./data")){
+			fs.mkdirSync("./data");
+		}
 		if(!fs.existsSync("./data/" + user.id)){
 			fs.mkdirSync("./data/" + user.id);
 		}
