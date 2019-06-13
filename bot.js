@@ -70,9 +70,9 @@ client.on('message', function(msg){
 		    		} else if(!moduleSwitches[elem.name]){
 		    			return;
 		    		}
-					elem.init(author, usersData);
+					elem.module.init(author, usersData);
 				});
-				slModule.save(usersData);
+				slModule.save(author, usersData[author.id]);
 				msg.reply('you now have a Potato Account.');
 			}
 		} else if(!isUserInitialized(author)){

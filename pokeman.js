@@ -441,12 +441,12 @@ module.exports = class Main{
 
 	setBalls(usersData, user, amount){
 		usersData[user.id].pokeBalls = amount;
-		slModule.save(usersData);
+		slModule.save(user, usersData[user.id]);
 	}
 
 	increaseBalls(usersData, user, amount){
 		usersData[user.id]["pokeBalls"] += amount;
-		slModule.save(usersData);
+		slModule.save(user, usersData[user.id]);
 	}
 
 	getPokemans(usersData, user){
@@ -459,7 +459,7 @@ module.exports = class Main{
 
 	killPokeman(usersData, user, num){
 		usersData[user.id].pokemans.splice(num, 1);
-		slModule.save(usersData);
+		slModule.save(user, usersData[user.id]);
 	}
 
 	getPokeman(usersData, user, index){
@@ -468,7 +468,7 @@ module.exports = class Main{
 
 	addPokeman(usersData, user, poke){
 		usersData[user.id].pokemans.push([poke.name, poke.level, poke.xp, poke.uniqueStats]);
-		slModule.save(usersData);
+		slModule.save(user, usersData[user.id]);
 	}
 
 	savePokeman(usersData, user, poke){
@@ -476,7 +476,7 @@ module.exports = class Main{
 			const p = usersData[user.id].pokemans[i];
 			if(p[0] === poke.name && p[3].attackStat === poke.uniqueStats.attackStat && p[3].defenseStat === poke.uniqueStats.defenseStat && p[3].speedStat === poke.uniqueStats.speedStat && p[3].healthStat === poke.uniqueStats.healthStat){
 				usersData[user.id].pokemans[i] = [poke.name, poke.level, poke.xp, poke.uniqueStats];
-				slModule.save(usersData);
+				slModule.save(user, usersData[user.id]);
 				return;
 			}
 		}

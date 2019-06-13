@@ -12,17 +12,26 @@ module.exports = class Main{
 	//returns true iff it processes a command.  This will process anything directly involving money.
 	processMessage(msg, command, usersData){	}
 
-	save(usersData){
-		fs.writeFile("data.txt", JSON.stringify(usersData), function(err){	});
+	save(user, data){
+		if(!fs.existsSync("./data/" + user.id)){
+			fs.mkdirSync("./data/" + user.id);
+		}
+		fs.writeFileSync("./data/" + user.id + "/data.txt", JSON.stringify(data), function(err){ });
 	}
 
 	load(loadFunc){
-		fs.readFile("data.txt", function(err, data){
-			if(data !== undefined){
-				loadFunc(JSON.parse(data.toString()));
-			} else {
-				loadFunc({});
-			}
+		let data = {};
+		let folders = fs.readdirSync("./data");
+		folders.forEach(function(i){
+			data[i] = JSON.parse(fs.readFileSync("./data/" + i + "/data.txt").toString());
 		});
+		loadFunc(data);
+		// fs.readFile("data.txt", function(err, data){
+		// 	if(data !== undefined){
+		// 		loadFunc(JSON.parse(data.toString()));
+		// 	} else {
+		// 		loadFunc({});
+		// 	}
+		// });
 	}
 }

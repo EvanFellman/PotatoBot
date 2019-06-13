@@ -91,13 +91,13 @@ module.exports = class Main{
 
 	setBalance(usersData, user, amount){
 		usersData[user.id].balance = amount;
-		slModule.save(usersData);
+		slModule.save(user, usersData[user.id]);
 
 	}
 
 	increaseBalance(usersData, user, amount){
 		usersData[user.id].balance += amount;
-		slModule.save(usersData);
+		slModule.save(user, usersData[user.id]);
 	}
 
 	calculateStockPrice(numStocks){
@@ -107,7 +107,7 @@ module.exports = class Main{
 	}
 	increaseStocks(usersData, user, amount){
 		usersData[user.id].stocks += amount;
-		slModule.save(usersData);
+		slModule.save(user, usersData[user.id]);
 	}
 
 	getStocks(usersData, user){
