@@ -1,5 +1,5 @@
 <h1>PotatoBot the Discord Bot</h1>
-<p>To run the bot launch runBot.bat</p>
+<p>To run the bot make token.txt and put in your token and launch runBot.bat</p>
 <p>Requires:</p>
 <ul>
 	<li>Windows</li>
