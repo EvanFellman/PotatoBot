@@ -1,1 +1,1 @@
-{"isOwner.js":true,"misc.js":true,"money.js":true,"pokeman.js":true,"saveandload.js":true}
+{"isOwner.js":true,"misc.js":true,"money.js":true,"pokeman.js":true,"saveandload.js":true,"horserace.js":true}
