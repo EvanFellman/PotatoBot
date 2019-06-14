@@ -4,7 +4,7 @@ const moneyModule = new (require("./money.js"))();
 let bet = {};
 let games = {};// used to store horses there chances of winning and the percentage money they can return.
 let speed = [];
-	-	
+let HELP_STRING = [];	
 //	-	
 
 //Now think of what representation would best store all of that information. Some examples could be a String, Integer, Object, Array, HashTable, etc.
@@ -16,7 +16,7 @@ let speed = [];
 
 //You don't need this variable
 //Just update the HELP_STRING in the main JS file
-let HELP_STRING = [];
+
 
 module.exports = class Main{
 	//You cannot have two different definitions for init
@@ -53,7 +53,7 @@ module.exports = class Main{
 		//	Then in that if statement put all of the other checks so you dont have to keep checking if the first statement is "hr"
 		//Something else to note is that every element in command is lower case.
 		//  This was done to allow users to not care about the casing of the commands they write since we will always process their statement after making all of the letters lower case.
-		if(command.length === 4 && command[0] === "horserace" || command[0] === "hr" && command[1] === "create" || command[1] === "c"){
+		if(command.length === 2 && command[0] === "horserace" || command[0] === "hr" && command[1] === "create" || command[1] === "c"){
 
 			
 			if(exsists = false){
@@ -66,7 +66,7 @@ module.exports = class Main{
 				
 					msg.channel.send(";2");
 					let amount = command[2];
-					bets[author.id]={bet: Math.abs(parseInt(command[2],horse: Math.abs(parseInt(command[3]}
+					bets[author.id]={bet: Math.abs(parseInt(command[2])),horse: Math.abs(parseInt(command[3]))}
 				    //i am trying to save the money each player bets and on which horse in this 
 					moneyModule.increaseBalance(usersData,author,(-1)*amount);
 					if(command[0] === "horserace" || command[0] ==="hr" && command[1] ==="start"|| command[1] === "st"){
@@ -161,7 +161,7 @@ module.exports = class Main{
 		}
 		
 	}
-	returnBets(bets{}){
+	returnBets(bets){
 		// need this to see which player placed bet on correct horse and return the money accordingly
 	}
 }
