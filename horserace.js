@@ -1,9 +1,29 @@
+//please test your code you would have spotted most of these errors if you had tested it
+
+
+
+
+
+
+
+
+
+
 const moneyModule = new (require("./money.js"))();
 //Make a list of things you need to store in a representation of a game below:
 //	- bet Object ----- I'll start you off
 let bet = {};
+
+
+//You are so close.  List what the keys and values are.
 let games = {};// used to store horses there chances of winning and the percentage money they can return.
+
+
+//Shouldn't be a variable here.
+//the speeds of the horses should be listed within the representation of a game.
 let speed = [];
+
+//This is not how you do the helper function please delete this
 let HELP_STRING = [];	
 //	-	
 
@@ -35,6 +55,7 @@ module.exports = class Main{
 	}
 		
 
+	//This is where you do the helper function stuff.  DONT use HELP_STRING
 	//I have to insert this so it wont bust
 	//helperCommand
 	help(){
@@ -45,8 +66,8 @@ module.exports = class Main{
 	processMessage(msg,command,horseRace){
 		const author = msg.author;
 		let exsists = false;// to check if a game is already there
-
-		//I dont know what this is for.  This feels like an incomplete thought.  Please expand on this and I can help.
+		//This is not a good way to check if a game exists. One variable is not enough.
+		//We need to know if there exists a game in the channel that a user sent a message in. 
 
 		//I would format this differently.
 		//Make one if statement checking if the first of command is "horserace" or "hr"
@@ -55,22 +76,50 @@ module.exports = class Main{
 		//  This was done to allow users to not care about the casing of the commands they write since we will always process their statement after making all of the letters lower case.
 		if(command.length === 2 && command[0] === "horserace" || command[0] === "hr" && command[1] === "create" || command[1] === "c"){
 
-			
+			//Again with the single equals.
+			//Single equals is for assignment while triple equals is for comparison
+			//Also never do a === false.  Isn't this the same as !a
+
 			if(exsists = false){
 				msg.channel.send("initialising new game. Place your bets");
 				games[channel.id][author.id] = {};
 				let thisGame = games[channel.id][author.id];
+				//This is SUPER close.  We do not need it further indexed by the author ID.  We only want to sort the games by the channel.id
+				//channel does not exist.  It is msg.channel.id
+
+
 				exsists = true;
 				// also need to send the table giving out informatione
-				if(command.length === 4 && command[0] === "horserace" || command[0] === "hr" && command[1] === "bets" || command[1] === "b"){
+
+				//Rethink the order of if statements
+				//This will never be true ---- even if a user sends ;hr b
+				if(command.length === 4 && (command[0] === "horserace" || command[0] === "hr") && (command[1] === "bets" || command[1] === "b")){
 				
 					msg.channel.send(";2");
+
+					//I'm assuming that you want amount to be of type float.  But it is type String.
 					let amount = command[2];
+					
+
+					//rename bet to amount so it is more clear that it is not the bet but how much you are betting
 					bets[author.id]={bet: Math.abs(parseInt(command[2])),horse: Math.abs(parseInt(command[3]))}
-				    //i am trying to save the money each player bets and on which horse in this 
-					moneyModule.increaseBalance(usersData,author,(-1)*amount);
-					if(command[0] === "horserace" || command[0] ==="hr" && command[1] ==="start"|| command[1] === "st"){
+					//please don't do this.  As said before you need to put bets in the representation of the game.  You will not be able to have multiple games at once with this representation.
+
+				    //I am trying to save the money each player bets and on which horse in this 
+					moneyModule.increaseBalance(usersData, author, (-1) * amount);
+
+					//Rethink the order of if statements
+					//This will never be true ----- even if a user sends ;hr st
+					if((command[0] === "horserace" || command[0] ==="hr") && (command[1] ==="start"|| command[1] === "st")){
 						let won = calculateWinningHorse();
+
+
+
+						//This does not print like you think it will
+						//JS will first append i to the end of "horse"
+						//then append 1 to the end of that
+						//then append "won" to the end of that
+						//Also i is not defined
 						msg.channel.send("horse"+ i+1 + "won");
 						//here i am trying to print which horse won.The function returns the index in the speed array 
 						//and this prints the corresponding horse.
@@ -89,8 +138,8 @@ module.exports = class Main{
     	for(let i = 0 ; i < 5 ; i++){
     		speed[i] = getRandomInt(0,10);
     	}
-   
-    	
+    	//No output.  If that's intentional thats okay
+    	//This representation will not work for more than one game going on at once.
     }
 
     getRandomInt(min, max) {
@@ -101,9 +150,13 @@ module.exports = class Main{
 
 	
     calculateChancesOfWinning(speed){
-    	
+    	//value of speed is undefined
+    	//calculateSpeed has no output
     	let speed = calculateSpeed();
-		return speed / totalspeed() * 100;
+		return (speed / totalspeed()) * 100;
+		//totalspeed does not exist.  Do you mean totalSpeed?
+		//totalSpeed outputs an array
+		//you cannot divide a number by an array
     }
 
     
@@ -113,13 +166,26 @@ module.exports = class Main{
     		sum = sum + speed[i];
     	}
     	return speed;
+    	//you meant to return sum
 		
 	}
 
     
 	calcTheChance(){
-		//I dont understand what this function does.
-		//I dont exactly like how it works. It biases the top too much. But if you like it dont change it.
+		//Emulate a race.  This function is not going to work well.
+		//For example: 
+		//	Scenario A:
+		//		Horse 1: speed of 9
+		//		Horse 2: speed of 1
+		//	Scenario B:
+		//		Horse 1: speed of 9
+		//		Horse 2: speed of 8
+		//Under this algorithm in Scenario A, Horse 1 has the same chance of winning as Horse 1 in Scenario B.  This is not fair.
+		//Also the payout is dependent on how low the speed is.  Therefore in Scenario A then Horse 2 has a VERY unfair advantage compared to Horse 2 in Scenario B.
+		//Please emulate a race where the speed is the chance out of 10 to go forward once.
+		//Each horse takes turn trying to go forward.
+		//First to distance of 3 units wins.
+		//This is a lot more fair
 		let speed = []//array of all speeds.// sort in ascending order
 		let number = getRandomInt(0,1);
 		if(number <= 0.35){
@@ -137,6 +203,8 @@ module.exports = class Main{
 	}
 
 	calculateWinningHorse(){
+		//Not a fan of this
+		//Its a confusing system that isnt actually dependent on the speeds of the horses.  Please read above how I want you to implement the program
 		let try1 = calcTheChance();
 		let try2 = calcTheChance();
 		let try3 = calcTheChance();
