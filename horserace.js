@@ -65,7 +65,9 @@ module.exports = class Main{
 
 	processMessage(msg,command,horseRace){
 		const author = msg.author;
-		let exsists = false;// to check if a game is already there
+		let exsists = false;
+		let id = msg.channel.id;// i know this is not right but for now.
+		// to check if a game is already there
 		//This is not a good way to check if a game exists. One variable is not enough.
 		//We need to know if there exists a game in the channel that a user sent a message in. 
 
@@ -75,59 +77,31 @@ module.exports = class Main{
 		//Something else to note is that every element in command is lower case.
 		//  This was done to allow users to not care about the casing of the commands they write since we will always process their statement after making all of the letters lower case.
 		if(command.length === 2 && command[0] === "horserace" || command[0] === "hr" && command[1] === "create" || command[1] === "c"){
-
-			//Again with the single equals.
-			//Single equals is for assignment while triple equals is for comparison
-			//Also never do a === false.  Isn't this the same as !a
-
-			if(exsists = false){
-				msg.channel.send("initialising new game. Place your bets");
-				games[channel.id][author.id] = {};
-				let thisGame = games[channel.id][author.id];
-				//This is SUPER close.  We do not need it further indexed by the author ID.  We only want to sort the games by the channel.id
+			games[msg.channel.id] = {};
+			let thisGame = games[msg.channel.id];//This is SUPER close.  We do not need it further indexed by the author ID.  We only want to sort the games by the channel.id
 				//channel does not exist.  It is msg.channel.id
-
-
+			
+			if(exsists = true && id = thisGame ){
+				msg.channel.send("game already in process");
+			else{
+				msg.channel.send("initialising new game. Place your bets");
 				exsists = true;
 				// also need to send the table giving out informatione
 
-				//Rethink the order of if statements
-				//This will never be true ---- even if a user sends ;hr b
-				if(command.length === 4 && (command[0] === "horserace" || command[0] === "hr") && (command[1] === "bets" || command[1] === "b")){
 				
-					msg.channel.send(";2");
-
-					//I'm assuming that you want amount to be of type float.  But it is type String.
-					let amount = command[2];
-					
-
-					//rename bet to amount so it is more clear that it is not the bet but how much you are betting
-					bets[author.id]={bet: Math.abs(parseInt(command[2])),horse: Math.abs(parseInt(command[3]))}
-					//please don't do this.  As said before you need to put bets in the representation of the game.  You will not be able to have multiple games at once with this representation.
-
-				    //I am trying to save the money each player bets and on which horse in this 
-					moneyModule.increaseBalance(usersData, author, (-1) * amount);
-
-					//Rethink the order of if statements
-					//This will never be true ----- even if a user sends ;hr st
-					if((command[0] === "horserace" || command[0] ==="hr") && (command[1] ==="start"|| command[1] === "st")){
-						let won = calculateWinningHorse();
-
-
-
-						//This does not print like you think it will
-						//JS will first append i to the end of "horse"
-						//then append 1 to the end of that
-						//then append "won" to the end of that
-						//Also i is not defined
-						msg.channel.send("horse"+ i+1 + "won");
-						//here i am trying to print which horse won.The function returns the index in the speed array 
-						//and this prints the corresponding horse.
-					}
-				}  
 			}
-			
-		} 
+		}else if(command.length === 4 && (command[0] === "horserace" || command[0] === "hr") && (command[1] === "bets" || command[1] === "b")){
+				msg.channel.send(";2");
+				let amount = command[2];//this will be the number ie the amount of the bet
+				games[author.id]={bet: Math.abs(parseInt(command[2])),horse: Math.abs(parseInt(command[3]))}
+					//please don't do this.  As said before you need to put bets in the representation of the game.  You will not be able to have multiple games at once with this representation.
+				moneyModule.increaseBalance(usersData, author, (-1) * amount);
+		}else if((command[0] === "horserace" || command[0] ==="hr") && (command[1] ==="start"|| command[1] === "st")){
+			let won = calculateWinningHorse();
+			msg.channel.send("horse"+ won+1 + "won");// this might print the way i want i tried it before.
+
+		}
+				
 	}
 
 	//betmoney(bet,user,amount){
@@ -138,6 +112,7 @@ module.exports = class Main{
     	for(let i = 0 ; i < 5 ; i++){
     		speed[i] = getRandomInt(0,10);
     	}
+    	return speed;//this  returns an array
     	//No output.  If that's intentional thats okay
     	//This representation will not work for more than one game going on at once.
     }
@@ -149,14 +124,13 @@ module.exports = class Main{
 	}
 
 	
-    calculateChancesOfWinning(speed){
-    	//value of speed is undefined
-    	//calculateSpeed has no output
+    calculateChancesOfWinning(){
+    	let speed1 = [];
     	let speed = calculateSpeed();
-		return (speed / totalspeed()) * 100;
-		//totalspeed does not exist.  Do you mean totalSpeed?
-		//totalSpeed outputs an array
-		//you cannot divide a number by an array
+    	for(let i = 0 ; i < 5 ; i++){
+    		speed1[i] = (speed[i]/totalSpeed)*100;
+    	}
+    	// this is probably wrong.
     }
 
     
@@ -165,8 +139,9 @@ module.exports = class Main{
     	for(let i = 0 ; i < speed.length ; i++){
     		sum = sum + speed[i];
     	}
-    	return speed;
+    	return sum;
     	//you meant to return sum
+    	//ya i did
 		
 	}
 
@@ -201,6 +176,8 @@ module.exports = class Main{
 		}
 		// caculating a biased random chance
 	}
+	// i honestly dont understand what you mean by chance to go forward once.
+	//like if the speeds are 9 and 8 then the horse 1 has 9/17 th chance to go forward while horse 2 has 8/17th. But then what?
 
 	calculateWinningHorse(){
 		//Not a fan of this
