@@ -1,57 +1,12 @@
-//please test your code you would have spotted most of these errors if you had tested it
-
-
-
-
-
-
-
-
-
-
 const moneyModule = new (require("./money.js"))();
-//Make a list of things you need to store in a representation of a game below:
-//	- bet Object ----- I'll start you off
-let bet = {};
 
 
-//You are so close.  List what the keys and values are.
-let games = {};// used to store horses there chances of winning and the percentage money they can return.
+let games = {};
 
-
-//Shouldn't be a variable here.
-//the speeds of the horses should be listed within the representation of a game.
-let speed = [];
-
-//This is not how you do the helper function please delete this
-let HELP_STRING = [];	
-//	-	
-
-//Now think of what representation would best store all of that information. Some examples could be a String, Integer, Object, Array, HashTable, etc.
-
-
-
-
-
-
-//You don't need this variable
-//Just update the HELP_STRING in the main JS file
-
+//I removed all of the useless variables.
 
 module.exports = class Main{
-	//You cannot have two different definitions for init
-	//	This does not make a whole lot of sense.
-	//	Init is used when we are making a new account for a user.
-	//	Also you do not want to associate a user's bet with the data that is stored.  If the bot resets then the horse race is forgotten
-	//	I don't save the pokeman battles.
-	//	I would make an init function that does nothing because we don't want to do anything when a user gets an account.
-	//  We can store their bets in the bets object located in the representation of the game.
-	//	Afterall, there can be many games going on at once where a user can have bets in all of them.
-	//	At all times there is at most one game per text channel that our bot has access to.
-	//	Meaning that putting bets in a user's account would make this difficult as they could participate in more than one game at once where they would bet differently.
-	//	I would put the bet object in the representation of a horse race game.
-	//	We should have some sort of collection of the horse race games.  We also want to associate each game with the ID of the text channel it is in.
-	init(user,data){ 
+	init(user, data){ 
 	}
 		
 
@@ -65,59 +20,91 @@ module.exports = class Main{
 
 	processMessage(msg,command,horseRace){
 		const author = msg.author;
-		let exsists = false;
-		let id = msg.channel.id;// i know this is not right but for now.
-		// to check if a game is already there
-		//This is not a good way to check if a game exists. One variable is not enough.
-		//We need to know if there exists a game in the channel that a user sent a message in. 
 
-		//I would format this differently.
-		//Make one if statement checking if the first of command is "horserace" or "hr"
-		//	Then in that if statement put all of the other checks so you dont have to keep checking if the first statement is "hr"
-		//Something else to note is that every element in command is lower case.
-		//  This was done to allow users to not care about the casing of the commands they write since we will always process their statement after making all of the letters lower case.
-		if(command.length === 2 && command[0] === "horserace" || command[0] === "hr" && command[1] === "create" || command[1] === "c"){
-			games[msg.channel.id] = {};
-			let thisGame = games[msg.channel.id];//This is SUPER close.  We do not need it further indexed by the author ID.  We only want to sort the games by the channel.id
-				//channel does not exist.  It is msg.channel.id
-			
-			if(exsists = true && id = thisGame ){
-				msg.channel.send("game already in process");
-			else{
-				msg.channel.send("initialising new game. Place your bets");
-				exsists = true;
-				// also need to send the table giving out informatione
+		//I got rid of the exsists variable because
+		//	1. 	It was misspelled
+		//	2.	It does not make sense to have it.
 
-				
-			}
-		}else if(command.length === 4 && (command[0] === "horserace" || command[0] === "hr") && (command[1] === "bets" || command[1] === "b")){
-				msg.channel.send(";2");
-				let amount = command[2];//this will be the number ie the amount of the bet
-				games[author.id]={bet: Math.abs(parseInt(command[2])),horse: Math.abs(parseInt(command[3]))}
-					//please don't do this.  As said before you need to put bets in the representation of the game.  You will not be able to have multiple games at once with this representation.
+
+		//I'll do the formatting thing I said earlier.
+		//Now the code is a LOT easier to read.
+		if(command.length > 1 && (command[0] === "horserace" || command[0] === "hr")){
+			if(command.length === 2 && (command[1] === "create" || command[1] === "c")){
+				//deleted a line that would ruin the game
+				let thisGame = games[msg.channel.id];
+				//Yessssss this is a good idea
+				//Why did you never use it?
+
+
+				//Dont use double equals, we use triple equals.  It avoids stupid behavior that double equals has.
+				//I fixed it for you
+				//I deleted it because it wouldn't work
+				//It doesn't make sense
+				//I'll write for you
+				if(Object.keys(thisGame).length !== 0) {
+					msg.channel.send("There is already a horse race in progress. Run `;horseRace go` to finish that game.");
+					//I improved your output if there is another game running.
+
+					//You didn't end your brace.  I fixed it for you.
+				} else {
+					//fixed your spelling
+					msg.channel.send("Initializing new game. Place your bets");
+
+					//Now initialize thisGame
+				}
+			} else if(command.length === 4 && (command[1] === "bets" || command[1] === "b")){
+				//bad tabbing --- I fixed it
+				//You have to check to see if the user actually has that much money
+
+
+				const amount = parseFloat(command[2]);
+				games[msg.channel.id].bets.push({amount: amount, horse: Math.abs(parseInt(command[3]))});
+				//You forgot a semicolon
+				//You made an amount variable ????
+				//Why not use it?
+
+				//You wrote it like this
+				//	games[author.id]= ......
+				//This is not how you did it before though
+				//I fixed it
+
+
+				//What you did before didn't make a lot of sense to me
+				//You were trying to get the games under the author id
+				//And then you set it to be an individual bet.
+				//We want to push another bet onto the bets array that is located in the games object under the channel's id.
+				//So I fixed it for you
+
 				moneyModule.increaseBalance(usersData, author, (-1) * amount);
-		}else if((command[0] === "horserace" || command[0] ==="hr") && (command[1] ==="start"|| command[1] === "st")){
-			let won = calculateWinningHorse();
-			msg.channel.send("horse"+ won+1 + "won");// this might print the way i want i tried it before.
-
+			} else if(command.length === 2 && (command[1] ==="start"|| command[1] === "st")){
+				let won = calculateWinningHorse();
+				msg.channel.send("Horse " + (won + 1) + " won!");
+				//You need to surround won + 1 with parentheses.
+				//You can determine that by testing the code or trying to think as to how the computer would run your code.
+				//You had msg.channel.send("horse"+ won+1 + "won"); before I fixed it.
+				//You also forgot to add spaces because even if you had remembered to put the parentheses it would appear like this:
+				//			horse2won
+				//This is not correct.
+				//Don't worry I fixed it.
+			}
 		}
-				
 	}
 
-	//betmoney(bet,user,amount){
-	  // bet[user.id].bets = amount;
-    //}
-
     calculateSpeed(){
+    	//I would not use this function 
+    	//I would just think about how to represent the game before you continue
+    	//If you think about how to represent the game you'll see why most of this code below wont work even if you fix the bugs.
+    	//Keep in mind we want more than one game going on at the same time.
     	for(let i = 0 ; i < 5 ; i++){
     		speed[i] = getRandomInt(0,10);
     	}
-    	return speed;//this  returns an array
-    	//No output.  If that's intentional thats okay
-    	//This representation will not work for more than one game going on at once.
+    	return speed;
+    	//This representation will not work for more than one game going on at once. !!!!!!!!!!!!!!!!!!!!!!!!!!
     }
 
     getRandomInt(min, max) {
+    	//Why are you rounding?
+    	//This does not make sense
   		min = Math.ceil(min);
  		max = Math.floor(max);
  		return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
@@ -125,24 +112,34 @@ module.exports = class Main{
 
 	
     calculateChancesOfWinning(){
+    	//I would not use this function 
+    	//I would just think about how to represent the game before you continue
+    	//If you think about how to represent the game you'll see why most of this code below wont work even if you fix the bugs.
+    	//Keep in mind we want more than one game going on at the same time.
     	let speed1 = [];
     	let speed = calculateSpeed();
     	for(let i = 0 ; i < 5 ; i++){
     		speed1[i] = (speed[i]/totalSpeed)*100;
+    		//I won't fix this because you gotta learn this
+    		//speed1 has nothing in it.
+    		//Please run the code
     	}
-    	// this is probably wrong.
+    	//This whole function can be done in calculateSpeed
+
+    	//No output
     }
 
     
     totalSpeed(){
+    	//I would not use this function 
+    	//I would just think about how to represent the game before you continue
+    	//If you think about how to represent the game you'll see why most of this code below wont work even if you fix the bugs.
+    	//Keep in mind we want more than one game going on at the same time.
     	let sum = 0;
     	for(let i = 0 ; i < speed.length ; i++){
     		sum = sum + speed[i];
     	}
     	return sum;
-    	//you meant to return sum
-    	//ya i did
-		
 	}
 
     
@@ -161,7 +158,10 @@ module.exports = class Main{
 		//Each horse takes turn trying to go forward.
 		//First to distance of 3 units wins.
 		//This is a lot more fair
-		let speed = []//array of all speeds.// sort in ascending order
+		let speed = [];//You forgot semicolon
+		//This function will not work as you intended 
+		//speed is length zero.
+		//Besides I would rewrite this function.
 		let number = getRandomInt(0,1);
 		if(number <= 0.35){
 			return speed[0];
@@ -174,14 +174,25 @@ module.exports = class Main{
 		}else{
 			return speed[4];
 		}
-		// caculating a biased random chance
 	}
 	// i honestly dont understand what you mean by chance to go forward once.
 	//like if the speeds are 9 and 8 then the horse 1 has 9/17 th chance to go forward while horse 2 has 8/17th. But then what?
+	//No.
+	//Make an array of length 5 (the number of horses you should have).
+	//Every element starts at zero
+	//Each element at index i represents Horse i + 1 's distance
+	//Each time Horse u moves forward do this:
+	//		array[u - 1]++;
+	//If array[u] === 3 then Horse u wins
 
 	calculateWinningHorse(){
-		//Not a fan of this
-		//Its a confusing system that isnt actually dependent on the speeds of the horses.  Please read above how I want you to implement the program
+		//I would not use this function 
+    	//I would just think about how to represent the game before you continue
+    	//If you think about how to represent the game you'll see why most of this code below wont work even if you fix the bugs.
+    	//Keep in mind we want more than one game going on at the same time.
+
+    	//also this code wouldn't work.
+    	//please test it
 		let try1 = calcTheChance();
 		let try2 = calcTheChance();
 		let try3 = calcTheChance();
@@ -204,10 +215,10 @@ module.exports = class Main{
 
 			}
 		}
-		
+		//Otherwise return nothing?????????????????????		
 	}
 	returnBets(bets){
-		// need this to see which player placed bet on correct horse and return the money accordingly
+		//need this to see which player placed bet on correct horse and return the money accordingly
 	}
 }
 
