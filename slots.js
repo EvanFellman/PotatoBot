@@ -109,8 +109,8 @@ module.exports = class Main{
 				out.push(a)
 			}
 			msg.channel.send({embed: {
-				fields: out,
-				color: 15444020
+				color: 15444020,
+				fields: out
 			  }
 			});
 		}
