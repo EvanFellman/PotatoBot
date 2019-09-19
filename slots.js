@@ -2,16 +2,16 @@ const moneyModule = new (require("./money.js"))();
 
 const WINNINGS = [
 	[['✨','✨','✨'], 25],
-	[['😂','😂','😂'], 1.25],
-	[['💸','💸','💸'], 0.5],
-	[['👹','👹','👹'], 3],
-	[['🎈','🎈','🎈'], 5],
-	[['🐇','🐇','🐇'], 2],
-	[['💸','🎈','*'], 4],
 	[['😂','👹','✨'], 15],
+	[['🎈','🎈','🎈'], 5],
+	[['👹','👹','👹'], 3],
+	[['🐇','🐇','🐇'], 2],
+	[['😂','🐇','🎈'], 2],
+	[['💸','🎈','*'], 2],
+	[['😂','😂','😂'], 1.25],
 	[['😂','😂','*'], 1.1],
 	[['✨','*','*'], 1.05],
-	[['😂','🐇','🎈'], 2]
+	[['💸','💸','💸'], 0.5]
 ]
 
 function wrapAround(n, max){
@@ -60,7 +60,10 @@ module.exports = class Main{
 	}
 
 	help(){
-		return {};
+		return {"slots": 
+			[["slots <number>", "This allows you to bet <number> on the slots machine"],
+			["slots list", "This shows the combinations you need to win"]]
+		};
 	}
 
 	processMessage(msg, command, usersData){
@@ -86,7 +89,7 @@ module.exports = class Main{
 				for(let i = 0; i < WINNINGS.length; i++){
 					if(isEqual(WINNINGS[i][0], [s1,s2,s3])){
 						moneyModule.increaseBalance(usersData, author, WINNINGS[i][1] * BET);
-						out += `\nYou won ${WINNINGS[i][1] * BET} monies!`;
+						out += `\nYou won ${Math.floor(100 * WINNINGS[i][1] * BET) / 100} monies!`;
 						break;
 					} else if(i == WINNINGS.length - 1){
 						out += `\nYou lost.`;
@@ -94,6 +97,21 @@ module.exports = class Main{
 				}
 				msg.channel.send(out);
 			}
+		} else if(command.length === 2 && command[0] === "slots" && (command[1] === "list" || command[1] === "l" || command[1] === "winnings" || command[1] === "w")){
+			let out = [];
+			for(let i = 0; i < WINNINGS.length; i++){
+				let a = {};
+				a.value = `${Math.floor(100 * WINNINGS[i][1])}%`
+				a.name = "";
+				for(let j = 0; j < 3; j++){
+					a.name += "\t" + WINNINGS[i][0][j];
+				}
+				out.push(a)
+			}
+			msg.channel.send({embed: {
+				fields: out,
+			  }
+			});
 		}
 	}
 }
