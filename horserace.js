@@ -18,7 +18,7 @@ module.exports = class Main{
 	}
 
 
-	processMessage(msg,command,horseRace){
+	processMessage(msg, command, usersData){
 		const author = msg.author;
 
 		//I got rid of the exsists variable because
