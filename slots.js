@@ -23,51 +23,6 @@ function wrapAround(n, max){
 	}
 }
 
-/*  stringArray is a list of strings.  Each element in this array is its own line (DONT put \n in the string just make it a new element)
- *  title is the title
- *  width is actually the minimum width of the box
- *  the height is determined by the number of elements in stringArray
- */
-function box(stringArray, title="", width=0){      //creates a box of text
-	let maxLen = width;
-	if(maxLen < title.length + 3){
-	  maxLen = title.length + 3;
-	}
-	for(let i = 0; i < stringArray.length; i++){
-	  if(stringArray[i].length > maxLen){
-		maxLen = stringArray[i].length + 1;
-	  }
-	}
-	let out = "";
-	if(title !== ""){
-	  out += "`";
-	  for(let i = 0; i < ((maxLen - title.length) / 2); i ++){
-		out += "~";
-	  }
-	  out += " " + title + " ";
-	  for(let i = out.length; i < maxLen + 3; i ++){
-		out += "~";
-	  }
-	  out += "`";
-	}
-	for(let i = 0; i < stringArray.length; i++){
-	  if(i === 0)
-		out += "\n`|"
-	  else 
-		out += "|`\n`|"
-	  out += stringArray[i];
-	  for(let j = stringArray[i].length; j < maxLen; j++){
-		out += " ";
-	  }
-	}
-	out += "|`\n`";
-	for(let i = 0; i < maxLen + 2; i++){
-		out += "~";
-	}
-	out += "`";
-	return out;
-  }
-
 function isEqual(correctCombo, attempt){
 	if(isEqualChar(correctCombo[0], attempt[0])){
 		if(isEqualChar(correctCombo[1], attempt[1])){
@@ -105,7 +60,10 @@ module.exports = class Main{
 	}
 
 	help(){
-		return {};
+		return {"slots": 
+			[["slots <number>", "This allows you to bet <number> on the slots machine"],
+			["slots list", "This shows the combinations you need to win"]]
+		};
 	}
 
 	processMessage(msg, command, usersData){
@@ -139,7 +97,7 @@ module.exports = class Main{
 				}
 				msg.channel.send(out);
 			}
-		} else if(command.length === 2 && command[0] === "slots" && command[1] === "list"){
+		} else if(command.length === 2 && command[0] === "slots" && (command[1] === "list" || command[1] === "l" || command[1] === "winnings" || command[1] === "w")){
 			let out = [];
 			for(let i = 0; i < WINNINGS.length; i++){
 				let a = {};
