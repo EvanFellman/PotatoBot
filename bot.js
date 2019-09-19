@@ -79,11 +79,11 @@ client.on('message', function(msg){
 			msg.reply("you do not have a Potato Account. To make a Potato Account run `" + STARTER + "Create Account`");
 		} else if((command.length === 1 || command.length === 2) && (command[0] === "help" || command[0] === "command" || command[0] === "h")){			/* help */
 			if(command.length === 1){
-				let out = [];
+				let out = "";
 				for(let i = 0; i < Object.keys(helpCommands).length; i++){
-					out.push(Object.keys(helpCommands)[i]);
+					out += Object.keys(helpCommands)[i].toString() + "\n";
 				}
-				msg.channel.send("use ;help <topic> to get more info about that topic\nuse ;create account to create an account\n" + box(out, "Topics"), {split:true});
+				msg.channel.send({embed:{title: "Use ;help <topic> to get more info about that topic\nUse ;create account to create an account\nTopics:",description: out}, split: true});
 			} else if(!(command[1] in helpCommands)){
 				msg.channel.send("This is not a topic that I can help with.");
 			} else {
