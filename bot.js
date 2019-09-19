@@ -83,7 +83,7 @@ client.on('message', function(msg){
 				for(let i = 0; i < Object.keys(helpCommands).length; i++){
 					out += Object.keys(helpCommands)[i].toString() + "\n";
 				}
-				msg.channel.send({embed:{title: "Use ;help <topic> to get more info about that topic\nUse ;create account to create an account\nTopics:",description: out}, split: true});
+				msg.channel.send({embed:{color: 15444020, title: "Use ;help <topic> to get more info about that topic\nUse ;create account to create an account\nTopics:",description: out}, split: true});
 			} else if(!(command[1] in helpCommands)){
 				msg.channel.send("This is not a topic that I can help with.");
 			} else {
