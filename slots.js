@@ -2,16 +2,16 @@ const moneyModule = new (require("./money.js"))();
 
 const WINNINGS = [
 	[['✨','✨','✨'], 25],
-	[['😂','😂','😂'], 1.25],
-	[['💸','💸','💸'], 0.5],
-	[['👹','👹','👹'], 3],
-	[['🎈','🎈','🎈'], 5],
-	[['🐇','🐇','🐇'], 2],
-	[['💸','🎈','*'], 4],
 	[['😂','👹','✨'], 15],
+	[['🎈','🎈','🎈'], 5],
+	[['👹','👹','👹'], 3],
+	[['🐇','🐇','🐇'], 2],
+	[['😂','🐇','🎈'], 2],
+	[['💸','🎈','*'], 2],
+	[['😂','😂','😂'], 1.25],
 	[['😂','😂','*'], 1.1],
 	[['✨','*','*'], 1.05],
-	[['😂','🐇','🎈'], 2]
+	[['💸','💸','💸'], 0.5]
 ]
 
 function wrapAround(n, max){
@@ -22,6 +22,51 @@ function wrapAround(n, max){
 		return mod;
 	}
 }
+
+/*  stringArray is a list of strings.  Each element in this array is its own line (DONT put \n in the string just make it a new element)
+ *  title is the title
+ *  width is actually the minimum width of the box
+ *  the height is determined by the number of elements in stringArray
+ */
+function box(stringArray, title="", width=0){      //creates a box of text
+	let maxLen = width;
+	if(maxLen < title.length + 3){
+	  maxLen = title.length + 3;
+	}
+	for(let i = 0; i < stringArray.length; i++){
+	  if(stringArray[i].length > maxLen){
+		maxLen = stringArray[i].length + 1;
+	  }
+	}
+	let out = "";
+	if(title !== ""){
+	  out += "`";
+	  for(let i = 0; i < ((maxLen - title.length) / 2); i ++){
+		out += "~";
+	  }
+	  out += " " + title + " ";
+	  for(let i = out.length; i < maxLen + 3; i ++){
+		out += "~";
+	  }
+	  out += "`";
+	}
+	for(let i = 0; i < stringArray.length; i++){
+	  if(i === 0)
+		out += "\n`|"
+	  else 
+		out += "|`\n`|"
+	  out += stringArray[i];
+	  for(let j = stringArray[i].length; j < maxLen; j++){
+		out += " ";
+	  }
+	}
+	out += "|`\n`";
+	for(let i = 0; i < maxLen + 2; i++){
+		out += "~";
+	}
+	out += "`";
+	return out;
+  }
 
 function isEqual(correctCombo, attempt){
 	if(isEqualChar(correctCombo[0], attempt[0])){
@@ -86,7 +131,7 @@ module.exports = class Main{
 				for(let i = 0; i < WINNINGS.length; i++){
 					if(isEqual(WINNINGS[i][0], [s1,s2,s3])){
 						moneyModule.increaseBalance(usersData, author, WINNINGS[i][1] * BET);
-						out += `\nYou won ${WINNINGS[i][1] * BET} monies!`;
+						out += `\nYou won ${Math.floor(100 * WINNINGS[i][1] * BET) / 100} monies!`;
 						break;
 					} else if(i == WINNINGS.length - 1){
 						out += `\nYou lost.`;
@@ -94,6 +139,21 @@ module.exports = class Main{
 				}
 				msg.channel.send(out);
 			}
+		} else if(command.length === 2 && command[0] === "slots" && command[1] === "list"){
+			let out = [];
+			for(let i = 0; i < WINNINGS.length; i++){
+				let a = {};
+				a.value = `${Math.floor(100 * WINNINGS[i][1])}%`
+				a.name = "";
+				for(let j = 0; j < 3; j++){
+					a.name += "\t" + WINNINGS[i][0][j];
+				}
+				out.push(a)
+			}
+			msg.channel.send({embed: {
+				fields: out,
+			  }
+			});
 		}
 	}
 }
