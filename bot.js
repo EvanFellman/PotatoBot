@@ -89,11 +89,9 @@ client.on('message', function(msg){
 			} else {
 				let out = [];
 				for(let i = 0; i < helpCommands[command[1]].length; i++){
-					out.push("");
-					out.push(helpCommands[command[1]][i][0]);
-					out.push("--" + helpCommands[command[1]][i][1]);
+					out.push({name: helpCommands[command[1]][i][0], value: helpCommands[command[1]][i][1]});
 				}
-				msg.channel.send(box(out, command[1] + " commands", 84), {split:true});
+				msg.channel.send({embed:{color: 15444020,title: `Commands for ${command[1]}`,fields: out},split:true});
 			}
 		} else if(command.length === 1 && (command[0] === "restart" || command[0] === "reboot" || command[0] === "refresh" || command[0] === "update")){
 			if(isOwner.isOwner(author)){
