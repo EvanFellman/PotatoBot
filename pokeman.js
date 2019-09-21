@@ -50,15 +50,15 @@ module.exports = class Main{
 		} else if(command.length >= 2 && (command[0] === "pokebattle" || command[0] === "pokemanbattle" || command[0] === "pokemonbattle" || command[0] === "pb")){
 			if(command.length == 2 && (command[1] === "list" || command[1] === "l")){
 				const a = this.getPokemans(usersData, author);
-				let out = [];
+				let out = "";
 				for(let i = 0; i < a.length; i++){
 					let b = "";
 					for(let j = a[i].getName().length; j < 20; j++){
 						b += " ";
 					}
-					out.push(`${i+1}. ${a[i].getName()}${b}lvl${a[i].level}`);
+					out += (`${i+1}. ${a[i].getName()}${b}lvl${a[i].level}\n`);
 				}
-				msg.channel.send(box(out));
+				msg.channel.send({embed:{color: 15444020, description: out, title: `${author.username}'s Pokemans`}});
 			} else if((command[1] === "pokedex" || command[1] === "info" || command[1] === "i")){
 				if(!isNaN(command[2])){
 					msg.channel.send(this.getPokeman(usersData, author, parseInt(command[2]) - 1).info(true, true), {split: true});
