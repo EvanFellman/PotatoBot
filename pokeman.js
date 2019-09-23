@@ -107,12 +107,16 @@ module.exports = class Main{
 				userPokeman.owner = author.username;
 				let wildPokeman = Object.values(pokemans);
 				wildPokeman = wildPokeman[Math.floor(Math.random() * wildPokeman.length)](Math.max(1, userPokeman.level + Math.floor(3 * ((Math.random() * 2) - 1))), 0, undefined, "Wild");
+				if(Math.abs(parseFloat(command[3])) > moneyModule.getBalance(usersData,author)){
+					msg.reply("you don't have enough monies!");
+					return;
+				}
 				//Store games in games object
 				//	Each game is saved under its channel and under both of the users' ids.
 				//	When making a two player pokeman battle, make one reference the other (example: games[msg.channel][author.id] = games[msg.channel][otherPlayer.id]; )
 				//		Therefore both players can edit and access the same game without needing to update both after doing something.
 				//wildBattle: bool, userPokeman: Pokeman, wildPokeman: Pokeman, bet: float
-				games[msg.channel.id][author.id] = {wildBattle: true, invite: false, battle: false, userPokeman: userPokeman, wildPokeman: wildPokeman, bet: Math.abs(parseInt(command[3])), message: null};
+				games[msg.channel.id][author.id] = {wildBattle: true, invite: false, battle: false, userPokeman: userPokeman, wildPokeman: wildPokeman, bet: Math.abs(parseFloat(command[3])), message: null};
 				let thisGame = games[msg.channel.id][author.id];
 				let out = `${thisGame.userPokeman.getName()} is battling a level ${thisGame.wildPokeman.level} ${thisGame.wildPokeman.getName()} for ${thisGame.bet} monies.\n`;
 				thisGame.userPokeman.resetPokeman();
