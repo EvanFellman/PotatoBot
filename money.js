@@ -11,7 +11,8 @@ module.exports = class Main{
 	//helperCommand
 	help(){
 		return {"money": [["balance", "Shows your balance"],
-						  ["pay @user <amount>"," This will pay @user amount monies"]],
+						  ["pay @user <amount>"," This will pay @user amount monies"],
+						  ["allowance", "This will give you money if you ran out"]],
 				"owner": [["give @user <amount>", "This will give @user amount monies"]],
 				"stocks": [["stocks price","This gives the price of buying and selling a stock"],
 						   ["stocks buy <numStocks>","This buys numStocks stocks"],
@@ -24,6 +25,14 @@ module.exports = class Main{
 		const author = msg.author;
 		if(command.length === 1 && (command[0] === "bal" || command[0] === "b" || command[0] === "balance")){			/* balance command */					
 			msg.reply(`you have ${Math.round(usersData[author.id].balance * 100) / 100} monies.`);
+		} else if(command.length === 1 && command[0] === "allowance"){
+			if(this.getBalance(usersData, author) < 1){
+				this.increaseBalance(usersData, author, 10);
+				msg.channel.send(`<@${author.id}> found 10 monies on the floor.`);
+				msg.delete();
+			} else {
+				msg.reply("you have enough money.");
+			}
 		} else if(command.length === 3 && (command[0] === "pay" || command[0] === "p")){
 			const otherUser = msg.mentions.members.first();
 			const pay = Math.abs(paseFloat(command[2]));
@@ -37,8 +46,8 @@ module.exports = class Main{
 		} else if(command.length === 3 && (command[0] === "give")){
 			if(isOwner.isOwner(author)){
 				const otherUser = msg.mentions.members.first();
-				msg.channel.send(`<@${otherUser.id}> found ${parseInt(command[2])} monies on the floor.`);
-				this.increaseBalance(usersData, otherUser, parseInt(command[2]));
+				msg.channel.send(`<@${otherUser.id}> found ${parseFloat(command[2])} monies on the floor.`);
+				this.increaseBalance(usersData, otherUser, parseFloat(command[2]));
 				msg.delete();
 			} else {
 				msg.reply("you do not have permission.");
