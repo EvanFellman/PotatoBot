@@ -61,7 +61,7 @@ module.exports = class Main{
 				msg.channel.send({embed:{color: 15444020, description: out, title: `${author.username}'s Pokemans`}});
 			} else if((command[1] === "pokedex" || command[1] === "info" || command[1] === "i")){
 				if(!isNaN(command[2])){
-					msg.channel.send(this.getPokeman(usersData, author, parseInt(command[2]) - 1).info(true, true), {split: true});
+					msg.channel.send("",this.getPokeman(usersData, author, parseInt(command[2]) - 1).info(true, true), {split: true});
 				} else {
 					let name = ""
 					for(let i = 2; i < command.length; i++){
@@ -71,19 +71,19 @@ module.exports = class Main{
 					let pokemansnames = Object.keys(pokemans);
 					for(let i = 0; i < pokemansnames.length; i++){
 						if(pokemansnames[i].toLowerCase() === name){
-							msg.channel.send(Object.values(pokemans)[i]().info());
+							msg.channel.send("",Object.values(pokemans)[i]().info());
 						}
 					}
 					let typenames = Object.keys(types);
 					for(let i = 0; i < typenames.length; i++){
 						if(typenames[i].toLowerCase() === name){
-							msg.channel.send(Object.values(types)[i].info());
+							msg.channel.send("",Object.values(types)[i].info());
 						}
 					}
 					let movenames = Object.keys(moves);
 					for(let i = 0; i < movenames.length; i++){
 						if(movenames[i].toLowerCase() === name){
-							msg.channel.send(Object.values(moves)[i].info());
+							msg.channel.send("",Object.values(moves)[i].info());
 						}
 					}
 				}
@@ -203,7 +203,6 @@ module.exports = class Main{
 						player1: otherUser, p1: otherUser, pokes1: pokes1, pokeNum1: npokes1, player2: author,p2: author, pokes2: pokes2, pokeNum2: npokes2};
 					games[msg.channel.id][author.id] = games[msg.channel.id][otherUser.id];
 					const thisGame = games[msg.channel.id][author.id];
-					console.log(games[msg.channel.id][author.id]);
 					const p1 = thisGame.player1;
 					const p2 = thisGame.player2;
 					const p1Poke = thisGame.pokes1[0];
@@ -509,13 +508,13 @@ class Type{
 	}
 
 	info(){
-		let a = [];
-		a.push(`=-- weaknesses`);
+		let a = "";
 		let b = Object.keys(this.weaknesses);
 		for(let i = 0; i < b.length; i ++){
-			a.push(`- ${b[i]}`);
+			a += `- ${b[i]}\n`;
 		}
-		return box(a, this.name);
+		a = a.substring(0, a.length - 1);
+		return {embed: {color: 15444020, fields: [{name: "Weaknesses", value: a}]}, split: true};
 	}
 }
 
@@ -556,13 +555,7 @@ class Move{
 	}
 
 	info(){
-		let a = [];
-		a.push(`=-- accuracy`);
-		a.push(`- ${this.accuracy}`);
-		a.push(``);
-		a.push(`=-- type`);
-		a.push(`- ${this.type.name}`);
-		return box(a, this.name);
+		return {embed: {color: 15444020,fields: [{name: "Accuracy", value: this.accuracy}, {name: "Type", value: this.type.name}], title: this.name}, split: true};
 	}
 }
 
@@ -636,7 +629,7 @@ class Pokeman{
 		return this.moves[i];
 	}
 
-	printMoves(w = 0){
+	printMoves(){
 		let a = [];
 		for(let i = 1; i <= this.moves.length; i++){
 			let b = "";
@@ -645,7 +638,7 @@ class Pokeman{
 			}
 			a.push(`${i} --- ${this.moves[i - 1].name}${b} - ${this.moves[i - 1].type.name}`);
 		}
-		return box(a,"",w);
+		return box(a,"");
 	}
 
 	//Move getMoveByName(name: String)
@@ -713,43 +706,34 @@ class Pokeman{
 		}
 	}
 
-	//String info(showLevel: boolean, showUniqueStats: boolean)
+	//embed info(showLevel: boolean, showUniqueStats: boolean)
 	info(showLevel=false, showUniqueStats=false){
-		let a = [`=--- Type`,`- ${this.type.name}`,``, `=--- Weak To Moves Of Types`];
+		let a = [{name: "Type", value: this.type.name}, {name: "Weak to Moves of Types", value: ""}];
 		const asdf = Object.keys(this.type.weaknesses);
 		for(let i = 0; i < asdf.length; i ++){
-			a.push(`- ${asdf[i]}`);
+			a[1].value += `- ${asdf[i]}\n`;
 		}
-
-		a = a.concat(``,
-			`=--- Base Stats`,`- attack -- ${this.baseStats.attackStat}`, ``, `- defense -- ${this.baseStats.defenseStat}`, ``, 
-			`- speed -- ${this.baseStats.speedStat}`, ``, `- health -- ${this.baseStats.healthStat}`);
-		if(showLevel){
-			a.unshift(``);
-			a.unshift(`- ${this.xp} xp`);
-			a.unshift(`=--- XP`);
-			a.unshift(``);
-			a.unshift(`- lvl ${this.level}`);
-			a.unshift(`=--- Level`);
-		}
+		a[1].value = a[1].value.substring(0, a[1].value.length - 1);
+		a.push({name: "Base Stats:", value: `- attack -- ${this.baseStats.attackStat}\n- defense -- ${this.baseStats.defenseStat}\n- speed -- ${this.baseStats.speedStat}\n- health -- ${this.baseStats.healthStat}`});
 		if(showUniqueStats){
-			a.push(``);
-			a.push(`=--- Unique Stats`);
-			a.push(``);
-			a.push(`- attack -- ${this.uniqueStats.attackStat}`);
-			a.push(``);
-			a.push(`- defense -- ${this.uniqueStats.defenseStat}`);
-			a.push(``);
-			a.push(`- speed -- ${this.uniqueStats.speedStat}`);
-			a.push(``);
-			a.push(`- health -- ${this.uniqueStats.healthStat}`);
+			a.push({name: "Unique Stats", value: `- attack -- ${this.uniqueStats.attackStat}\n- defense -- ${this.uniqueStats.defenseStat}\n- speed -- ${this.uniqueStats.speedStat}\n- health -- ${this.uniqueStats.healthStat}`});
 		}
-		let out = box(a, this.getName(), 50);
 		if(showLevel){
-			a.push(``);
-			a.push(`=--- Moves`);
-			out = box(a, this.getName(), 40) + this.printMoves(40);
+			a.unshift({name: "XP", value: this.xp + " xp"});
+			a.unshift({name: "Level", value: "lvl " + this.level})
 		}
+		if(showLevel){
+			let temp = "";
+			for(let i = 1; i <= this.moves.length; i++){
+				let b = "";
+				for(let j = this.moves[i - 1].name.length; j < 20; j++){
+					b += " ";
+				}
+				temp += `${i}. ${this.moves[i - 1].name}${b} - ${this.moves[i - 1].type.name}\n`;
+			}
+			a.push({name: "Moves", value: temp.substring(0, temp.length - 1)});
+		}
+		const out = {embed: {fields: a, color: 15444020, title: this.getName()}, split: true};
 		return out;
 	}
 }
@@ -843,15 +827,16 @@ types["grass"] = new Type("grass", ["fire"]);
 types["toxic"] = new Type("toxic", ["fire"]);
 types["rock"] = new Type("rock", ["toxic"]);
 
-//						  new Move(moveName: String, accuracy: natural, type: Type, attackFunction(thisMonster, thierMonster) => {damage: natural, myStatusEffect: StatusEffect, theirStatusEffect: StatusEffect});
+//						  new Move(moveName: String, accuracy: natural, type: Type, attackFunction(thisMonster, theirMonster) => {damage: natural, myStatusEffect: StatusEffect, theirStatusEffect: StatusEffect});
 moves["Burn Baby Burn"] = new Move("Burn Baby Burn", 65, types["fire"], (a, b) => {return {damage: Math.round(25 + (Math.random() * 25)), myStatusEffect: null, theirStatusEffect: null }});
 moves["Poison"] = new Move("Poison", 75, types["toxic"], (a, b) => {return {damage: 0, myStatusEffect: null, theirStatusEffect: statusEffects["poison"]()}});
 moves["Bark"] = new Move("Bark", 70, types["grass"], (a, b) => {return {damage: Math.round(50 + (Math.random() * 15)), myStatusEffect: null, theirStatusEffect: null}});
 moves["Sleep Dust"] = new Move("Sleep Dust", 80, types["water"], (a, b) => {return {damage: 3 * b.health / 4, myStatusEffect: statusEffects["sleep"](), theirStatusEffect: null}});
-
+moves["Splash"] = new Move("Splash", 70, types["water"], (a, b) => { return {damage: 60 + (Math.random() * 25), myStatusEffect: null, theirStatusEffect: null}});
 //					   (level: nat, xp: nat, stats: Stats, owner: String) => new Pokeman(pokemanName: String, type: Type, moves: Move[], baseStats: Stats, level: nat, xp: nat, stats: Stats, owner: String);
 pokemans["Yah Yeet"] = (level, xp, stats, owner) => new Pokeman("Yah Yeet", types["fire"], [moves["Burn Baby Burn"], moves["Poison"]], new Stats(300, 50, 50, 60), level, xp, stats, owner);
 pokemans["Dog"] = (level, xp, stats, owner) => new Pokeman("Dog", types["grass"], [moves["Bark"], moves["Sleep Dust"]], new Stats(500, 80, 30, 50), level, xp, stats, owner);
+pokemans["Fishy"] = (level, xp, stats, owner) => new Pokeman("Fishy", types["water"], [moves["Splash"]], new Stats(400, 60, 45, 90), level, xp, stats, owner);
 //						  () => new StatusEffect(name: String, desc: String, type: Type, active: boolean, attackFunc(thisM: Pokeman) => number, freeFunc(thisM: Pokeman) => boolean);
 statusEffects["poison"] = () => new StatusEffect("poison", "poisoned", types["toxic"], true, (thisM) => thisM.calcMaxHealth() / 8, (thisM) => (Math.random() * (500 - (thisM.baseStats.speedStat + thisM.uniqueStats.speedStat)) < 50));
 statusEffects["sleep"] = () => new StatusEffect("sleep", "sleeping", types["water"], false, (thisM) => 0, (thisM) => (Math.random() * (500 - (thisM.baseStats.speedStat + thisM.uniqueStats.speedStat))) < 100);
