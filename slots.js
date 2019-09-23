@@ -74,7 +74,7 @@ module.exports = class Main{
 			} else {
 				const BET = parseFloat(command[1]);
 				moneyModule.increaseBalance(usersData, author, (-1) * BET);
-				const WHEEL_SYMBOLS = ['😂','💸','👹','🐇','🎈','💸','👹','😂','🐇','💸','✨','😂','🎈','💸','🐇'];
+				const WHEEL_SYMBOLS = ['😂','💸','👹','🐇','🎈','💸','👹','😂','❌','🐇','💸','✨','😂','🎈','💸','🐇'];
 				let w1 = Math.floor(Math.random() * WHEEL_SYMBOLS.length);
 				let w2 = Math.floor(Math.random() * WHEEL_SYMBOLS.length);
 				let w3 = Math.floor(Math.random() * WHEEL_SYMBOLS.length);
@@ -109,7 +109,8 @@ module.exports = class Main{
 				out.push(a)
 			}
 			msg.channel.send({embed: {
-				fields: out,
+				color: 15444020,
+				fields: out
 			  }
 			});
 		}
