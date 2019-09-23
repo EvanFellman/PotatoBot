@@ -693,10 +693,10 @@ class Pokeman{
 				let description = "";
 				if(a.damage < 0){
 					this.health += (-1) * a.damage;
-					description += `${this.getName()} has healed ${(-1) * a.damage} health!`;
+					description += `${this.getName()} has healed ${Math.round((-1) * a.damage)} health!`;
 				} else if(a.damage > 0){
 					otherMonster.health -= a.damage;
-					description += `${otherMonster.getName()} has lost ${a.damage} health!`;
+					description += `${otherMonster.getName()} has lost ${Math.round(a.damage)} health!`;
 				}
 				if(a.myStatusEffect !== null && this.status === null){
 					this.status = a.myStatusEffect;
@@ -768,7 +768,7 @@ class StatusEffect{
 			damage *= (200 + (200 - (thisMonster.baseStats.defenseStat + thisMonster.uniqueStats.defenseStat))) / 400;
 			thisMonster.health -= damage;
 			return damage === 0 ? (!this.active ? ` ${thisMonster.getName()} is ${this.description} and cannot fight!` : 
-				` ${thisMonster.getName()} is still ${this.description}.`) : ` ${thisMonster.getName()} lost ${damage} health because they are ${this.description}.`;
+				` ${thisMonster.getName()} is still ${this.description}.`) : ` ${thisMonster.getName()} lost ${Math.round(damage)} health because they are ${this.description}.`;
 		}
 	}
 }
