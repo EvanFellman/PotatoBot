@@ -617,7 +617,7 @@ class Pokeman{
 		for(asdf; asdf < length; asdf++){
 			out += "░";
 		}
-		out += "│\n╰";
+		out += "│ " + Math.round(this.health) + " / " + Math.round(this.calcMaxHealth()) + "\n╰";
 		for(let i = 0; i < 1 + (length * 2 / 3); i++){
 			out += "━";
 		}
