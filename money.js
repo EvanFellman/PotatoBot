@@ -72,7 +72,7 @@ module.exports = class Main{
 				}
 			}else if(command.length === 3 && (command[1] ==="sell" || command[1] === 's')){
 				let cost = 0;
-				for(let i = 0; i < parseInt(command[2]); i++){
+				for(let i = 1; i <= parseInt(command[2]); i++){
 					cost += this.calculateStockPrice(numStocks - i);
 				}
 				if(usersData[author.id].stocks >= parseInt(command[2])){
