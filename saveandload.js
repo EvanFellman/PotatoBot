@@ -19,22 +19,15 @@ module.exports = class Main{
 		if(!fs.existsSync("./data/" + user.id)){
 			fs.mkdirSync("./data/" + user.id);
 		}
-		fs.writeFileSync("./data/" + user.id + "/data.txt", JSON.stringify(data), function(err){ });
+		fs.writeFileSync("./data/" + user.id + "/data.json", JSON.stringify(data), function(err){ });
 	}
 
 	load(loadFunc){
 		let data = {};
 		let folders = fs.readdirSync("./data");
 		folders.forEach(function(i){
-			data[i] = JSON.parse(fs.readFileSync("./data/" + i + "/data.txt").toString());
+			data[i] = JSON.parse(fs.readFileSync("./data/" + i + "/data.json").toString());
 		});
 		loadFunc(data);
-		// fs.readFile("data.txt", function(err, data){
-		// 	if(data !== undefined){
-		// 		loadFunc(JSON.parse(data.toString()));
-		// 	} else {
-		// 		loadFunc({});
-		// 	}
-		// });
 	}
 }

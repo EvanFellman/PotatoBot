@@ -10,7 +10,7 @@ let helpCommands = {"owner": [["restart", "This will restart the bot"],
 							  ["modules list", "This will list what modules are active"],
 							  ["modules flip <module name>", "This will turn a module on or off"]]};
 let modules = [];
-const moduleSwitches = JSON.parse(fs.readFileSync("./moduleSwitches.txt"));
+const moduleSwitches = JSON.parse(fs.readFileSync("./moduleSwitches.json"));
 const slModule = new (require("./saveandload.js"))();
 let isOwner = new (require("./isOwner.js"))();
 /* read the token from token.txt */
@@ -66,7 +66,7 @@ client.on('message', function(msg){
 				modules.forEach(function(elem){
 					if(!(elem.name in moduleSwitches)){
 		    			moduleSwitches[elem.name] = true;
-			    		fs.writeFileSync("./moduleSwitches.txt",JSON.stringify(moduleSwitches));
+			    		fs.writeFileSync("./moduleSwitches.json",JSON.stringify(moduleSwitches));
 		    		} else if(!moduleSwitches[elem.name]){
 		    			return;
 		    		}
@@ -149,7 +149,7 @@ client.on('message', function(msg){
 							let temp = !moduleSwitches[command[2]];
 							moduleSwitches[command[2]] = !moduleSwitches[command[2]];
 							msg.channel.send(`${command[2]} is set to ${temp}.`);
-							fs.writeFileSync("./moduleSwitches.txt", JSON.stringify(moduleSwitches));
+							fs.writeFileSync("./moduleSwitches.json", JSON.stringify(moduleSwitches));
 						}
 					}
 				}
@@ -158,7 +158,7 @@ client.on('message', function(msg){
 	    	modules.forEach(function(elem){
 	    		if(!(elem.name in moduleSwitches)){
 		    		moduleSwitches[elem.name] = true;
-			    	fs.writeFileSync("./moduleSwitches.txt",JSON.stringify(moduleSwitches));
+			    	fs.writeFileSync("./moduleSwitches.json",JSON.stringify(moduleSwitches));
 	    		} else if(!moduleSwitches[elem.name]){
 	    			return;
 	    		}
