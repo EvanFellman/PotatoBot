@@ -134,13 +134,9 @@ client.on('message', function(msg){
 			if(command.length === 2 && command[1] === "list"){
 				let arr = [];
 				for(let i = 0; i < Object.keys(moduleSwitches).length; i++){
-					let space = "";
-					for(let j = Object.keys(moduleSwitches)[i].length; j < 25; j++){
-						space += " ";
-					}
-					arr.push(Object.keys(moduleSwitches)[i] + space + Object.values(moduleSwitches)[i])
+					arr.push({name: Object.keys(moduleSwitches)[i], value: Object.values(moduleSwitches)[i]});
 				}
-				msg.channel.send(box(arr, "Modules"));
+				msg.channel.send({embed: {fields: arr, color: 15444020, title: "Modules"}, split: true});
 			} else if(command.length === 3 && command[1] === "flip"){
 				if(!isOwner.isOwner(author)){
 					msg.reply(`you do not have permission.`);
