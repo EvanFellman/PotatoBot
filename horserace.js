@@ -10,7 +10,10 @@ module.exports = class Main{
 	}
 		
 	help(){
-		return {};
+		return {"horserace": [
+					["horseRace create", "Initializes a race"],
+					["horseRace bet <horse number> <amount>", "Bets <amount> on horse <horse number>"],
+					["horseRace go", "Sets the horses of to the race!"]]};
 	}
 
 	processMessage(msg, command, usersData){
