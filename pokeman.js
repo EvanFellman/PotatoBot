@@ -196,7 +196,7 @@ module.exports = class Main{
 			} else if(command.length >= 4 && (command[1] === "accept")){
 				const otherUser = msg.mentions.users.first();
 				if(games[msg.channel.id] && (!games[msg.channel.id][author.id]) && (games[msg.channel.id][otherUser.id] && games[msg.channel.id][otherUser.id].invite)){
-					const ppokes2 = this.getPokemans(usersData, otherUser);
+					const ppokes2 = this.getPokemans(usersData, author);
 					const npokes2 = command.slice(3).map(x => parseInt(x));
 					let pokes2 = [];
 					for(let i = 0; i < npokes2.length; i++){
@@ -270,7 +270,7 @@ module.exports = class Main{
 								msg.reply(`not a proper PokeNumber`);
 							} else {
 								for(let i = 0; i < thisGame.pokeNum1.length;i++){
-									if(thisGame.pokeNum1[i] === switchTo){
+									if(thisGame.pokeNum1[i] + 1 === switchTo){
 										const tempPoke = thisGame.pokes1[i];
 										const tempNum = thisGame.pokeNum1[i];
 										thisGame.pokes1[i] = thisGame.pokes1[0];
@@ -294,7 +294,7 @@ module.exports = class Main{
 								msg.reply(`not a proper PokeNumber`);
 							} else {
 								for(let i = 0; i < thisGame.pokeNum2.length;i++){
-									if(thisGame.pokeNum2[i] === switchTo){
+									if(thisGame.pokeNum2[i] + 1 === switchTo){
 										const tempPoke = thisGame.pokes2[i];
 										const tempNum = thisGame.pokeNum2[i];
 										thisGame.pokes2[i] = thisGame.pokes2[0];
