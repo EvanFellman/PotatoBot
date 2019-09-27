@@ -13,13 +13,13 @@ module.exports = class Main{
 	processMessage(msg, command, usersData){	}
 
 	addOwner(user){
-		const owners = JSON.parse(fs.readFileSync("./owners.txt"));
+		const owners = JSON.parse(fs.readFileSync("./owners.json"));
 		owners[user.id] = true;
-		fs.writeFileSync("./owners.txt",JSON.stringify(owners));
+		fs.writeFileSync("./owners.json",JSON.stringify(owners));
 	}
 
 	isOwner(user){
-		const owners = JSON.parse(fs.readFileSync("./owners.txt"));
+		const owners = JSON.parse(fs.readFileSync("./owners.json"));
 		if(owners[user.id]){
 			return true;
 		} else {
