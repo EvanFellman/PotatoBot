@@ -859,11 +859,12 @@ function box(stringArray, title="", width=0){      //creates a box of text
   return out;
 }
 //				new Type(typeName: String, weakness: String[]);
-types["Fire"] = new Type("Fire", ["Water","Rock"]);
+types["Fire"] = new Type("Fire", ["Water","Rock", "Air"]);
 types["Water"] = new Type("Water", ["Grass"]);
-types["Grass"] = new Type("Grass", ["Fire"]);
+types["Grass"] = new Type("Grass", ["Fire", "Air"]);
 types["Toxic"] = new Type("Toxic", ["Fire"]);
 types["Rock"] = new Type("Rock", ["Toxic"]);
+types["Air"] = new Type("Air", ["Water", "Fire"]);
 
 //						  new Move(moveName: String, accuracy: natural, type: Type, attackFunction(thisMonster, theirMonster) => {damage: natural, myStatusEffect: StatusEffect, theirStatusEffect: StatusEffect});
 moves["Burn Baby Burn"] = new Move("Burn Baby Burn", 95, types["Fire"], (a, b) => {return {damage: Math.round(25 + (Math.random() * 25)), myStatusEffect: null, theirStatusEffect: null }});
@@ -873,11 +874,14 @@ moves["Sleep Dust"] = new Move("Sleep Dust", 80, types["Water"], (a, b) => {retu
 moves["Splash"] = new Move("Splash", 70, types["Water"], (a, b) => { return {damage: 40 + (Math.random() * 25), myStatusEffect: null, theirStatusEffect: null}});
 moves["Knock Out"] = new Move("Knock Out", 90, types["Rock"], (a, b) => { return {damage: 0, myStatusEffect: null, theirStatusEffect: statusEffects["sleep"]()}; });
 moves["Slap"] = new Move("Slap", 85, types["Rock"], (a, b) => { return {damage: 40 + (Math.random() * 10), myStatusEffect: null, theirStatusEffect: null}; });
+moves["Hypnosis"] = new Move("Hypnosis", 75, types["Air"], (a, b) => { return {damage: 44, myStatusEffect: null, theirStatusEffect: null}; });
+moves["Wind Attack"] = new Move("Wind Attack", 90, types["Air"], (a, b) => { return {damage: 30 + (Math.random() * 40), myStatusEffect: null, theirStatusEffect: null}; });
 //					   (level: nat, xp: nat, stats: Stats, owner: String) => new Pokeman(pokemanName: String, type: Type, moves: Move[], baseStats: Stats, level: nat, xp: nat, stats: Stats, owner: String, evolve: {natural: (Pokeman) => ()});
 pokemans["Yah Yeet"] = (level, xp, stats, owner) => new Pokeman("Yah Yeet", types["Fire"], [moves["Burn Baby Burn"], moves["Poison"]], new Stats(300, 50, 50, 60), level, xp, stats, owner);
-pokemans["Dog"] = (level, xp, stats, owner) => new Pokeman("Dog", types["Grass"], [moves["Bark"], moves["Sleep Dust"]], new Stats(500, 80, 30, 50), level, xp, stats, owner);
-pokemans["Fishy"] = (level, xp, stats, owner) => new Pokeman("Fishy", types["Water"], [moves["Splash"]], new Stats(200, 60, 45, 90), level, xp, stats, owner, {3: (p) => { p.baseStats.attackStat = 80;}, 5: (p) => {p.moves.push(moves["Bark"]); }});
-pokemans["Monkey"] = (level, xp, stats, owner) => new Pokeman("Monkey", types["Rock"], [moves["Slap"]], new Stats(350, 65, 80, 40), level, xp, stats, owner, {5: (p) => { p.moves.push(moves["Knock Out"]); }});
+pokemans["Dog"] = (level, xp, stats, owner) => new Pokeman("Dog", types["Grass"], [moves["Bark"], moves["Sleep Dust"]], new Stats(500, 80, 30, 50), level, xp, stats, owner, {7: (p) => { p.baseStats.speedStat = 40; p.baseStats.attackStat = 85; }});
+pokemans["Fishy"] = (level, xp, stats, owner) => new Pokeman("Fishy", types["Water"], [moves["Splash"]], new Stats(200, 60, 30, 90), level, xp, stats, owner, {3: (p) => { p.baseStats.attackStat = 80;}, 5: (p) => {p.moves.push(moves["Bark"]); }});
+pokemans["Monkey"] = (level, xp, stats, owner) => new Pokeman("Monkey", types["Rock"], [moves["Slap"]], new Stats(350, 35, 80, 40), level, xp, stats, owner, {5: (p) => { p.moves.push(moves["Knock Out"]); }});
+pokemans["Hedwig"] = (level, xp, stats, owner) => new Pokeman("Hedwig", types["Air"], [moves["Hypnosis"], moves["Wind Attack"]], new Stats(400, 40, 80, 45), level, xp, stats, owner);
 //						  () => new StatusEffect(name: String, desc: String, type: Type, active: boolean, attackFunc(thisM: Pokeman) => number, freeFunc(thisM: Pokeman) => boolean);
 statusEffects["poison"] = () => new StatusEffect("poison", "poisoned", types["Toxic"], true, (thisM) => thisM.calcMaxHealth() / 8, (thisM) => (Math.random() * (500 - (thisM.baseStats.speedStat + thisM.uniqueStats.speedStat)) < 50));
 statusEffects["sleep"] = () => new StatusEffect("sleep", "sleeping", types["Water"], false, (thisM) => 0, (thisM) => (Math.random() * (500 - (thisM.baseStats.speedStat + thisM.uniqueStats.speedStat))) < 100);
