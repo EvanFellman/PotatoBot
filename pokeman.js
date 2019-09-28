@@ -195,6 +195,9 @@ module.exports = class Main{
 				}
 			} else if(command.length >= 4 && (command[1] === "accept")){
 				const otherUser = msg.mentions.users.first();
+				if(otherUser === undefined){
+					return;
+				}
 				if(games[msg.channel.id] && (!games[msg.channel.id][author.id]) && (games[msg.channel.id][otherUser.id] && games[msg.channel.id][otherUser.id].invite)){
 					const ppokes2 = this.getPokemans(usersData, author);
 					const npokes2 = command.slice(3).map(x => parseInt(x));
@@ -261,57 +264,61 @@ module.exports = class Main{
 						msg.reply(`not a proper PokeNumber.`);
 					} else {
 						const thisGame = games[msg.channel.id][author.id];
-						const switchTo = parseInt(command[2]) - 1;
+						const switchTo = parseInt(command[2]);
 						if(switchTo < 0){
 							msg.reply(`not a proper PokeNumber`);
 						} else if(author.id === thisGame.player1.id){
 							//author is player 1
-							if(switchTo >= thisGame.pokeNum1.length){
-								msg.reply(`not a proper PokeNumber`);
-							} else {
-								for(let i = 0; i < thisGame.pokeNum1.length;i++){
-									if(thisGame.pokeNum1[i] + 1 === switchTo){
-										const tempPoke = thisGame.pokes1[i];
-										const tempNum = thisGame.pokeNum1[i];
-										thisGame.pokes1[i] = thisGame.pokes1[0];
-										thisGame.pokes1[0] = tempPoke;
-										thisGame.pokeNum1[i] = thisGame.pokeNum1[0];
-										thisGame.pokeNum1[0] = tempNum;
-										break;
-									}
+							let flag = true;
+							for(let i = 0; i < thisGame.pokeNum1.length;i++){
+								if(thisGame.pokeNum1[i] === switchTo){
+									const tempPoke = thisGame.pokes1[i];
+									const tempNum = thisGame.pokeNum1[i];
+									thisGame.pokes1[i] = thisGame.pokes1[0];
+									thisGame.pokes1[0] = tempPoke;
+									thisGame.pokeNum1[i] = thisGame.pokeNum1[0];
+									thisGame.pokeNum1[0] = tempNum;
+									flag = false;
+									break;
 								}
-								msg.channel.send(`<@${p1.id}> has switched to ${thisGame.pokes1[0].getName()}!`);
-								let out = `It is <@${p2.id}>'s turn.\n${thisGame.pokes2[0].getName()}'s health:\n${thisGame.pokes2[0].printHealthBar()}`;
-								out += `\n\n ${thisGame.pokes1[0].getName()}'s health:\n${thisGame.pokes1[0].printHealthBar()}`;
-								out += `\nUse \`pokebattle attack <move number>\` to use a move. Or use \`pokebattle switch <pokeNumber>\` to switch to a different pokeman.`;
-								out += `${thisGame.pokes2[0].printMoves()}`;
-								msg.channel.send(out, {split: true});
-								thisGame.turn = p2.id;
 							}
+							if(flag){
+								msg.reply("not a proper PokeNumber");
+								return;
+							}
+							msg.channel.send(`<@${p1.id}> has switched to ${thisGame.pokes1[0].getName()}!`);
+							let out = `It is <@${p2.id}>'s turn.\n${thisGame.pokes2[0].getName()}'s health:\n${thisGame.pokes2[0].printHealthBar()}`;
+							out += `\n\n ${thisGame.pokes1[0].getName()}'s health:\n${thisGame.pokes1[0].printHealthBar()}`;
+							out += `\nUse \`pokebattle attack <move number>\` to use a move. Or use \`pokebattle switch <pokeNumber>\` to switch to a different pokeman.`;
+							out += `${thisGame.pokes2[0].printMoves()}`;
+							msg.channel.send(out, {split: true});
+							thisGame.turn = p2.id;
 						} else {
 							//author is player 2
-							if(switchTo >= thisGame.pokeNum2.length){
-								msg.reply(`not a proper PokeNumber`);
-							} else {
-								for(let i = 0; i < thisGame.pokeNum2.length;i++){
-									if(thisGame.pokeNum2[i] + 1 === switchTo){
-										const tempPoke = thisGame.pokes2[i];
-										const tempNum = thisGame.pokeNum2[i];
-										thisGame.pokes2[i] = thisGame.pokes2[0];
-										thisGame.pokes2[0] = tempPoke;
-										thisGame.pokeNum2[i] = thisGame.pokeNum2[0];
-										thisGame.pokeNum2[0] = tempNum;
-										break;
-									}
+							let flag = true;
+							for(let i = 0; i < thisGame.pokeNum2.length;i++){
+								if(thisGame.pokeNum2[i] === switchTo){
+									const tempPoke = thisGame.pokes2[i];
+									const tempNum = thisGame.pokeNum2[i];
+									thisGame.pokes2[i] = thisGame.pokes2[0];
+									thisGame.pokes2[0] = tempPoke;
+									thisGame.pokeNum2[i] = thisGame.pokeNum2[0];
+									thisGame.pokeNum2[0] = tempNum;
+									flag = false;
+									break;
 								}
-								msg.channel.send(`<@${p2.id}> has switched to ${thisGame.pokes2[0].getName()}!`);
-								let out = `It is <@${p1.id}>'s turn.\n${thisGame.pokes1[0].getName()}'s health:\n${thisGame.pokes1[0].printHealthBar()}`;
-								out += `\n\n ${thisGame.pokes2[0].getName()}'s health:\n${thisGame.pokes2[0].printHealthBar()}`;
-								out += `\nUse \`pokebattle attack <move number>\` to use a move. Or use \`pokebattle switch <pokeNumber>\` to switch to a different pokeman.`;
-								out += `${thisGame.pokes1[0].printMoves()}`;
-								msg.channel.send(out, {split: true});
-								thisGame.turn = p1.id;
 							}
+							if(flag){
+								msg.reply("not a proper PokeNumber");
+								return;
+							}
+							msg.channel.send(`<@${p2.id}> has switched to ${thisGame.pokes2[0].getName()}!`);
+							let out = `It is <@${p1.id}>'s turn.\n${thisGame.pokes1[0].getName()}'s health:\n${thisGame.pokes1[0].printHealthBar()}`;
+							out += `\n\n ${thisGame.pokes2[0].getName()}'s health:\n${thisGame.pokes2[0].printHealthBar()}`;
+							out += `\nUse \`pokebattle attack <move number>\` to use a move. Or use \`pokebattle switch <pokeNumber>\` to switch to a different pokeman.`;
+							out += `${thisGame.pokes1[0].printMoves()}`;
+							msg.channel.send(out, {split: true});
+							thisGame.turn = p1.id;
 						}
 					}
 				} else {
@@ -401,6 +408,8 @@ module.exports = class Main{
 										msg.channel.send(`${out}<@${author.id}> ran out of Pokemans. <@${otherUser.id}> made ${thisGame.bet} monies.`, {split: true});
 										moneyModule.increaseBalance(usersData, otherUser, thisGame.bet);
 										moneyModule.increaseBalance(usersData, author, (-1) * thisGame.bet);
+										delete games[msg.channel.id][author.id];
+										delete games[msg.channel.id][otherUser.id];
 										return;
 									} else {
 										userPokeman = userPokes[0];
@@ -415,6 +424,8 @@ module.exports = class Main{
 										msg.channel.send(`${out}<@${otherUser.id}> ran out of Pokemans. <@${author.id}> made ${thisGame.bet} monies.`, {split: true});
 										moneyModule.increaseBalance(usersData, author, thisGame.bet);
 										moneyModule.increaseBalance(usersData, otherUser, (-1) * thisGame.bet);
+										delete games[msg.channel.id][author.id];
+										delete games[msg.channel.id][otherUser.id];
 										return;
 									} else {
 										otherPokeman = otherPokes[0];
