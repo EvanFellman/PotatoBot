@@ -121,6 +121,10 @@ module.exports = class Main{
 					games[msg.channel.id] = {};
 				}
 				const userPokeman = this.getPokemans(usersData, author)[parseInt(command[2]) - 1];
+				if(userPokeman === undefined){
+					msg.reply("not a valid poke number.");
+					return;
+				}
 				userPokeman.owner = author.username;
 				let wildPokeman = Object.values(pokemans);
 				wildPokeman = wildPokeman[Math.floor(Math.random() * wildPokeman.length)](Math.max(1, userPokeman.level + Math.floor(3 * ((Math.random() * 2) - 1))), 0, undefined, "Wild");
@@ -558,7 +562,7 @@ class Move{
 
 	//attack(thisMonster: Pokeman, otherMonster: Pokeman) => {damage: number, myStatusEffect: StatusEffect, theirStatusEffect: StatusEffect, description: String}
 	attack(thisMonster, otherMonster){
-		if(Math.random() < this.accuracy / 100){
+		if(Math.random() < this.accuracy / 100 && (thisMonster.status === null || Math.random() < thisMonster.status.confusion)){
 			let a = this.attackFunc(thisMonster, otherMonster);
 			a.description = "";
 			if(this.type.isStrongTo(otherMonster.type)){
@@ -719,6 +723,10 @@ class Pokeman{
 			if(moveIndex >= this.moves.length || moveIndex < 0){
 				return;
 			} else {
+				if(this.moves[moveIndex] === undefined){
+					msg.reply("not a valid move number.");
+					return;
+				}
 				let a = this.moves[moveIndex].attack(this, otherMonster);
 				a.damage *= ((this.baseStats.attackStat + this.uniqueStats.attackStat) / 200) * ((this.level / otherMonster.level) * 0.5);
 				a.damage *= Math.round((200 + (200 - (otherMonster.baseStats.defenseStat + otherMonster.uniqueStats.defenseStat))) / 400);
@@ -738,7 +746,6 @@ class Pokeman{
 					otherMonster.status = a.theirStatusEffect;
 					description += ` ${otherMonster.getName()} now is ${otherMonster.status.description}.`;
 				}
-				
 				return `${this.getName()} used ${this.moves[moveIndex].name}! ${description} ${a.description} ${statusString}`;
 			}
 		}
@@ -760,17 +767,15 @@ class Pokeman{
 			a.unshift({name: "XP", value: this.xp + " xp"});
 			a.unshift({name: "Level", value: "lvl " + this.level})
 		}
-		if(showLevel){
-			let temp = "";
-			for(let i = 1; i <= this.moves.length; i++){
-				let b = "";
-				for(let j = this.moves[i - 1].name.length; j < 20; j++){
-					b += " ";
-				}
-				temp += `${i}. ${this.moves[i - 1].name}${b} - ${this.moves[i - 1].type.name}\n`;
+		let temp = "";
+		for(let i = 1; i <= this.moves.length; i++){
+			let b = "";
+			for(let j = this.moves[i - 1].name.length; j < 20; j++){
+				b += " ";
 			}
-			a.push({name: "Moves", value: temp.substring(0, temp.length - 1)});
+			temp += `${i}. ${this.moves[i - 1].name}${b} - ${this.moves[i - 1].type.name}\n`;
 		}
+		a.push({name: "Moves", value: temp.substring(0, temp.length - 1)});
 		const out = {embed: {fields: a, color: 15444020, title: this.getName()}, split: true};
 		return out;
 	}
@@ -778,7 +783,7 @@ class Pokeman{
 
 class StatusEffect{
 	//void constructor(name: String, description: String, type: Type, active: boolean, attackFunc: function(thisMonster) => number, freeFunc: function(thisMonster) => boolean)
-	constructor(name, description, type, active, attackFunc, freeFunc){
+	constructor(name, description, type, active, attackFunc, freeFunc, confusion=100){
 		this.name = name;
 		this.description = description;
 		this.attackFunc = attackFunc;		//function to determine damage
@@ -786,6 +791,7 @@ class StatusEffect{
 		this.inEffect = true;
 		this.freeFunc = freeFunc;			//function to determine if status is lifted
 		this.type = type;
+		this.confusion = confusion / 100;
 	}
 
 	//String tick(thisMonster: Pokeman)
@@ -869,12 +875,12 @@ types["Air"] = new Type("Air", ["Water", "Fire"]);
 //						  new Move(moveName: String, accuracy: natural, type: Type, attackFunction(thisMonster, theirMonster) => {damage: natural, myStatusEffect: StatusEffect, theirStatusEffect: StatusEffect});
 moves["Burn Baby Burn"] = new Move("Burn Baby Burn", 95, types["Fire"], (a, b) => {return {damage: Math.round(25 + (Math.random() * 25)), myStatusEffect: null, theirStatusEffect: null }});
 moves["Poison"] = new Move("Poison", 75, types["Toxic"], (a, b) => {return {damage: 0, myStatusEffect: null, theirStatusEffect: statusEffects["poison"]()}});
-moves["Bark"] = new Move("Bark", 60, types["Grass"], (a, b) => {return {damage: Math.round(50 + (Math.random() * 15)), myStatusEffect: null, theirStatusEffect: null}});
+moves["Bark"] = new Move("Bark", 65, types["Grass"], (a, b) => {return {damage: Math.round(50 + (Math.random() * 15)), myStatusEffect: null, theirStatusEffect: null}});
 moves["Sleep Dust"] = new Move("Sleep Dust", 80, types["Water"], (a, b) => {return {damage: 3 * b.health / 4, myStatusEffect: statusEffects["sleep"](), theirStatusEffect: null}});
 moves["Splash"] = new Move("Splash", 70, types["Water"], (a, b) => { return {damage: 40 + (Math.random() * 25), myStatusEffect: null, theirStatusEffect: null}});
 moves["Knock Out"] = new Move("Knock Out", 90, types["Rock"], (a, b) => { return {damage: 0, myStatusEffect: null, theirStatusEffect: statusEffects["sleep"]()}; });
 moves["Slap"] = new Move("Slap", 85, types["Rock"], (a, b) => { return {damage: 40 + (Math.random() * 10), myStatusEffect: null, theirStatusEffect: null}; });
-moves["Hypnosis"] = new Move("Hypnosis", 75, types["Air"], (a, b) => { return {damage: 44, myStatusEffect: null, theirStatusEffect: null}; });
+moves["Hypnosis"] = new Move("Hypnosis", 75, types["Air"], (a, b) => { return {damage: 15, myStatusEffect: null, theirStatusEffect: statusEffects["confusion"]()}; });
 moves["Wind Attack"] = new Move("Wind Attack", 90, types["Air"], (a, b) => { return {damage: 30 + (Math.random() * 40), myStatusEffect: null, theirStatusEffect: null}; });
 //					   (level: nat, xp: nat, stats: Stats, owner: String) => new Pokeman(pokemanName: String, type: Type, moves: Move[], baseStats: Stats, level: nat, xp: nat, stats: Stats, owner: String, evolve: {natural: (Pokeman) => ()});
 pokemans["Yah Yeet"] = (level, xp, stats, owner) => new Pokeman("Yah Yeet", types["Fire"], [moves["Burn Baby Burn"], moves["Poison"]], new Stats(300, 50, 50, 60), level, xp, stats, owner);
@@ -885,3 +891,4 @@ pokemans["Hedwig"] = (level, xp, stats, owner) => new Pokeman("Hedwig", types["A
 //						  () => new StatusEffect(name: String, desc: String, type: Type, active: boolean, attackFunc(thisM: Pokeman) => number, freeFunc(thisM: Pokeman) => boolean);
 statusEffects["poison"] = () => new StatusEffect("poison", "poisoned", types["Toxic"], true, (thisM) => thisM.calcMaxHealth() / 8, (thisM) => (Math.random() * (500 - (thisM.baseStats.speedStat + thisM.uniqueStats.speedStat)) < 50));
 statusEffects["sleep"] = () => new StatusEffect("sleep", "sleeping", types["Water"], false, (thisM) => 0, (thisM) => (Math.random() * (500 - (thisM.baseStats.speedStat + thisM.uniqueStats.speedStat))) < 100);
+statusEffects["confusion"] = () => new StatusEffect("confusion", "confused", types["Air"], true, (thisM) => 0, (thisM) => (Math.random() * (500 - (thisM.baseStats.speedStat + thisM.uniqueStats.speedStat))) < 100, 60);
