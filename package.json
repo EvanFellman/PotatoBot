@@ -1,0 +1,19 @@
+{
+  "name": "potatobot",
+  "version": "1.0.0",
+  "description": "<h1>PotatoBot the Discord Bot</h1>\r <p>To run the bot make token.txt and put in your token and launch runBot.bat</p>\r <p>Requires:</p>\r <ul>\r \t<li>Windows</li>\r \t<li>Node js</li>\r </ul>\r <p>Features:</p>\r <ul>\r \t<li>modular. You can add your own mods or remove the current ones.</li>\r \t<li>economy\r \t\t<ul>\r \t\t\t<li>Stocks</li>\r \t\t\t<li>Payment between users</li>\r \t\t</ul>\r \t</li>\r \t<li>help command</li>\r \t<li>games\r \t\t<ul>\r \t\t\t<li>Pokeman</li>\r \t\t\t<li>Horse races</li>\r \t\t</ul>\r \t</li>\r </ul>",
+  "main": "bot.js",
+  "scripts": {
+    "test": "none"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EvanFellman/PotatoBot.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/EvanFellman/PotatoBot/issues"
+  },
+  "homepage": "https://github.com/EvanFellman/PotatoBot#readme"
+}
