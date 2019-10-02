@@ -1,0 +1,3 @@
+[submodule "DiscordToken"]
+	path = DiscordToken
+	url = https://github.com/EvanFellman/DiscordToken.git
