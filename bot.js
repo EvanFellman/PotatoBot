@@ -14,7 +14,7 @@ const moduleSwitches = JSON.parse(fs.readFileSync("./moduleSwitches.json"));
 const slModule = new (require("./saveandload.js"))();
 let isOwner = new (require("./isOwner.js"))();
 /* read the token from token.txt */
-fs.readFile('token.txt', function(err,txt){
+fs.readFile('DiscordToken\\token.txt', function(err,txt){
 	fs.readdir('.', function(error,files){
 		slModule.load(function(data){
 			usersData = data;
