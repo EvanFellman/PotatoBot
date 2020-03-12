@@ -2,7 +2,6 @@
 <p>To run the bot make token.txt and put in your token and launch runBot.bat</p>
 <p>Requires:</p>
 <ul>
-	<li>Windows</li>
 	<li>Node js</li>
 </ul>
 <p>Features:</p>
