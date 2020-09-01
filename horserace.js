@@ -71,7 +71,7 @@ module.exports = class Main{
 									let out = `Horse ${i + 1} won the race! `;
 									for(let j = 0; j < winnings.length; j++){
 										out += `<@${winnings[j][0]}> won ${winnings[j][1]} monies.`;
-										moneyModule.increaseBalance(usersData, winnings[j][0], winnings[j][1])
+										moneyModule.increaseBalance(usersData, {id: winnings[j][0]}, winnings[j][1])
 									}
 									msg.channel.send(out.substring(0, out.length - 1));
 								}

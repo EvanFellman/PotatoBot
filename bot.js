@@ -235,7 +235,7 @@ client.on('message', function(msg){
 	    		try{
 	    			elem.module.processMessage(msg,command,usersData);
 	    		} catch(e){
-	    			msg.reply(e);
+	    			console.log(e);
 	    		}
 	    	});
 	    }

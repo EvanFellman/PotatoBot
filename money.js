@@ -105,6 +105,7 @@ module.exports = class Main{
 	}
 
 	increaseBalance(usersData, user, amount){
+		console.log(usersData[user.id]);
 		usersData[user.id].balance += amount;
 		slModule.save(user, usersData[user.id]);
 	}

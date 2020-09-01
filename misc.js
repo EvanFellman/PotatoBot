@@ -21,13 +21,13 @@ module.exports = class Main{
 						msg.channel.send("Sorry I don't have any funny photos");
 						console.log("I don't have any funny photos :(");
 					} else {
-						msg.channel.send("", {file: "funnyPics/" + randomString(files)});
+						msg.channel.send("", {files: ["./funnyPics/" + randomString(files)]});
 					}
 				});
 			}
 		} else if(command[0] === "avatar"){															/* shows a user's avatar */
 	      let otherUser = msg.mentions.users.first();
-	      msg.channel.send("", {file: otherUser.displayAvatarURL.substring(0, otherUser.displayAvatarURL.length - 9)});
+	      msg.channel.send("", {files: [otherUser.avatarURL()]});
 	    }
 	}
 }
