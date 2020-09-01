@@ -19,15 +19,29 @@ module.exports = class Main{
 		if(!fs.existsSync("./data/" + user.id)){
 			fs.mkdirSync("./data/" + user.id);
 		}
-		fs.writeFileSync("./data/" + user.id + "/data.json", JSON.stringify(data), function(err){ });
+		fs.writeFileSync("./data/" + user.id + "/data.json", JSON.stringify(data), function(err){ console.log(err)});
 	}
 
 	load(loadFunc){
 		let data = {};
 		let folders = fs.readdirSync("./data");
 		folders.forEach(function(i){
+			if(i === "globalData.json"){
+				return;
+			}
 			data[i] = JSON.parse(fs.readFileSync("./data/" + i + "/data.json").toString());
 		});
 		loadFunc(data);
+	}
+
+	saveGlobalData(data){
+		if(!fs.existsSync("./data")){
+			fs.mkdirSync("./data");
+		}
+		fs.writeFileSync("./data/globalData.json", JSON.stringify(data), function(err){ });
+	}
+
+	loadGlobalData(loadFunc){
+		loadFunc(JSON.parse(fs.readFileSync("./data/globalData.json").toString()));
 	}
 }

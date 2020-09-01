@@ -28,7 +28,7 @@ module.exports = class Main{
 							["pokebattle accept @user <pokemans seperated by spaces>", "Accept a battle"],
 							["pokebattle decline @user", "Decline a battle"],
 							["pokebattle switch <pokeNumber>", "Switches out your pokemon to the specified pokeman"],
-							["pokebattle battle @user amount <pokemans seperated by spaces>", "Invite a user to a battle"],
+							["pokebattle battle @user <amount> <pokemans seperated by spaces>", "Invite a user to a battle"],
 							["pokebattle throwball", "Throw a pokeball to try to catch a pokeman"],
 							["pokebattle end", "Ends a battle"],
 							["pokebattle release <pokeNumber>", "Releases your pokeman into the wild"]]};

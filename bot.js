@@ -8,16 +8,22 @@ let usersData = {};
 let helpCommands = {"owner": [["restart", "This will restart the bot"],
 							  ["addOwner @user", "This will give a user owner permissions"],
 							  ["modules list", "This will list what modules are active"],
-							  ["modules flip <module name>", "This will turn a module on or off"]]};
+							  ["modules flip <module name>", "This will turn a module on or off"]],
+					"purge": [["purge <hours>", "Purge messages in this channel after <hours> hours"],
+							  ["purge all", "Purge all messages"],
+							  ["purge off", "Stop purging"],
+							  ["purge me", "Purge all of your messages"]]};
 let modules = [];
 const moduleSwitches = JSON.parse(fs.readFileSync("./moduleSwitches.json"));
 const slModule = new (require("./saveandload.js"))();
 let isOwner = new (require("./isOwner.js"))();
+let globalData = {};
 /* read the token from token.txt */
 fs.readFile('DiscordToken\\token.txt', function(err,txt){
 	fs.readdir('.', function(error,files){
 		slModule.load(function(data){
 			usersData = data;
+			console.log(usersData);
 			for(var i = 0; i < files.length;i++){
 				if(files[i].substring(files[i].length-3) === '.js' && files[i] !== "bot.js"){  // looks over the files having js and adds them in modules
 					let m = new (require("./" + files[i]))();
@@ -34,6 +40,9 @@ fs.readFile('DiscordToken\\token.txt', function(err,txt){
 			}
 			console.log("Logging in...");
 			client.login(txt.toString());
+			slModule.loadGlobalData(function(data){
+				globalData = data;
+			})
 		});
 	});
 });
@@ -45,9 +54,7 @@ client.on('ready', () => {
 
 /* on a message run this */
 client.on('message', function(msg){
-	if(msg.content.toLowerCase() === "yahyeet" || msg.content.toLowerCase() === "yah yeet"){ 			/* when a user says "yah yeet" it will respond with a picture */
-		msg.channel.send("", {files: ["https://i.ytimg.com/vi/GoMfQR390Wk/maxresdefault.jpg"]});
-	} else if(msg.content.substring(0,1) === STARTER){													/* If it starts with STARTER then its a command */
+	if(msg.content.substring(0,1) === STARTER){													/* If it starts with STARTER then its a command */
 		let command = msg.content.substring(1).toLowerCase().split(" ");
 		const author = msg.author;
 		let i = 0;
@@ -130,6 +137,59 @@ client.on('message', function(msg){
 			} else {
 				msg.reply("you do not have permission.");
 			}
+		} else if(command[0] === "purge"){
+			if(command[1] === "all" && command.length === 2){
+				if(!msg.member.hasPermission("ADMINISTRATOR")){
+					return;
+				}
+				msg.channel.messages.fetch().then(function(messages){
+					const deleteMessages = [];
+					messages.each(m => {
+						deleteMessages.push(m);
+					});
+					msg.channel.bulkDelete(deleteMessages);
+				}).catch(console.error);
+			} else if(command[1] === "off" && command.length === 2){
+				if(!msg.member.hasPermission("ADMINISTRATOR")){
+					return;
+				}
+				let index = 0;
+				while(index < globalData['snapchat'].length && globalData['snapchat'][index].id !== msg.channel.id){
+					index ++;
+				}
+				if(index !== globalData['snapchat'].length){
+					globalData['snapchat'].splice(index, 1);
+					slModule.saveGlobalData(globalData);
+				}
+				msg.reply("This channel will no longer be purged");
+			} else if(command[1] === "me" && command.length === 2){
+				const id = msg.author.id;
+				msg.channel.messages.fetch().then(function(messages){
+					const deleteMessages = [];
+					messages.filter(m => m.author.id === id).each(m => {
+						deleteMessages.push(m);
+					});
+					msg.channel.bulkDelete(deleteMessages);
+				});
+				msg.delete();
+			} else if(command.length === 2){
+				if(!msg.member.hasPermission("ADMINISTRATOR")){
+					return;
+				}
+				const hours = parseFloat(command[1]);
+				let flag = true;
+				for(let i = 0; i < globalData['snapchat'].length; ++i){
+					if(globalData['snapchat'][i].id === msg.channel.id){
+						globalData['snapchat'][i].time = hours;
+						flag = false;
+					}
+				}
+				if(flag){
+					globalData['snapchat'].push({id: msg.channel.id, time: hours});
+				}
+				msg.reply("This channel will purge all messages that are " + hours + " hours old.");
+				slModule.saveGlobalData(globalData);
+			}
 		} else if(command.length >= 2 && command[0] === "modules"){
 			if(command.length === 2 && command[1] === "list"){
 				let arr = [];
@@ -167,6 +227,23 @@ client.on('message', function(msg){
 	    }
 	} 
 });
+
+const snapChatInterval = setInterval(function(){
+	for(let i = 0; i < globalData['snapchat'].length; ++i){
+		const channelID = globalData['snapchat'][i].id;
+		const timeAlive = globalData['snapchat'][i].time;
+		client.channels.fetch(channelID).then(channel =>{
+			channel.messages.fetch().then(function(messages){
+				const deleteMessages = [];
+				messages.filter(m => Date.now() - m.createdTimestamp > timeAlive * 60 * 60 * 1000).each(m => {
+					deleteMessages.push(m);
+				});
+				channel.bulkDelete(deleteMessages);
+			}).catch(console.error);
+		});
+
+	}
+}, 10000);
 
 /*  stringArray is a list of strings.  Each element in this array is its own line (DONT put \n in the string just make it a new element)
  *  title is the title
