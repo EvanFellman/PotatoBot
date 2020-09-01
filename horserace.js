@@ -34,6 +34,7 @@ module.exports = class Main{
 						f.push({name: `Horse ${i + 1}`, value: `${speed} units of speed. ${Math.round(profit * 100)}% profit.`});
 					}
 					msg.channel.send({embed: {color: 15444020, title: "Horse Race", fields: f}});
+					msg.delete();
 				}
 			} else if(command.length === 4 && (command[1] === "bets" || command[1] === "b" || command[1] == "bet")){
 				const amount = parseFloat(command[3]);
@@ -70,6 +71,7 @@ module.exports = class Main{
 									let out = `Horse ${i + 1} won the race! `;
 									for(let j = 0; j < winnings.length; j++){
 										out += `<@${winnings[j][0]}> won ${winnings[j][1]} monies.`;
+										moneyModule.increaseBalance(usersData, winnings[j][0], winnings[j][1])
 									}
 									msg.channel.send(out.substring(0, out.length - 1));
 								}

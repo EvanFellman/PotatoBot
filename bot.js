@@ -12,7 +12,8 @@ let helpCommands = {"owner": [["restart", "This will restart the bot"],
 					"purge": [["purge <hours>", "Purge messages in this channel after <hours> hours"],
 							  ["purge all", "Purge all messages"],
 							  ["purge off", "Stop purging"],
-							  ["purge me", "Purge all of your messages"]]};
+							  ["purge me", "Purge all of your messages"]],
+					"misc": [["link", "Gets the link to add to any of your discord servers"]]};
 let modules = [];
 const moduleSwitches = JSON.parse(fs.readFileSync("./moduleSwitches.json"));
 const slModule = new (require("./saveandload.js"))();
@@ -82,6 +83,8 @@ client.on('message', function(msg){
 				slModule.save(author, usersData[author.id]);
 				msg.reply('you now have a Potato Account.');
 			}
+		} else if(command.length === 1 && command[0] === "link"){
+			msg.channel.send("https://discord.com/api/oauth2/authorize?client_id=568111260504162310&permissions=8&scope=bot");
 		} else if(!isUserInitialized(author)){
 			msg.reply("you do not have a Potato Account. To make a Potato Account run `" + STARTER + "Create Account`");
 		} else if((command.length === 1 || command.length === 2) && (command[0] === "help" || command[0] === "command" || command[0] === "h")){			/* help */
@@ -96,7 +99,7 @@ client.on('message', function(msg){
 			} else {
 				let out = [];
 				for(let i = 0; i < helpCommands[command[1]].length; i++){
-					out.push({name: helpCommands[command[1]][i][0], value: helpCommands[command[1]][i][1]});
+					out.push({name: STARTER + helpCommands[command[1]][i][0], value: helpCommands[command[1]][i][1]});
 				}
 				msg.channel.send({embed:{color: 15444020,title: `Commands for ${command[1]}`,fields: out},split:true});
 			}
@@ -125,6 +128,7 @@ client.on('message', function(msg){
 				});
 				console.log("Restarting...");
 				msg.channel.send("Restarting...");
+				msg.delete();
 				client.destroy();
 			} else {
 				msg.reply("you do not have permission.");

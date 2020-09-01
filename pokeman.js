@@ -366,7 +366,7 @@ module.exports = class Main{
 									}
 								}
 							}
-							thisGame.message.then(a => {a.edit(out);});
+							thisGame.message.then(a => {a[0].edit(out);});
 						}
 						msg.delete();
 					} else if(games[msg.channel.id][author.id].battle){
