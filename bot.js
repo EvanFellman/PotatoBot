@@ -140,6 +140,8 @@ client.on('message', function(msg){
 		} else if(command[0] === "purge"){
 			if(command[1] === "all" && command.length === 2){
 				if(!msg.member.hasPermission("ADMINISTRATOR")){
+					msg.channel.send("You need admin permissions to run ;purge all");
+					msg.delete();
 					return;
 				}
 				msg.channel.messages.fetch().then(function(messages){
@@ -151,6 +153,8 @@ client.on('message', function(msg){
 				}).catch(console.error);
 			} else if(command[1] === "off" && command.length === 2){
 				if(!msg.member.hasPermission("ADMINISTRATOR")){
+					msg.channel.send("You need admin permissions to run ;purge off");
+					msg.delete();
 					return;
 				}
 				let index = 0;
@@ -174,6 +178,8 @@ client.on('message', function(msg){
 				msg.delete();
 			} else if(command.length === 2){
 				if(!msg.member.hasPermission("ADMINISTRATOR")){
+					msg.channel.send("You need admin permissions to run ;purge <hours>");
+					msg.delete();
 					return;
 				}
 				const hours = parseFloat(command[1]);
@@ -222,7 +228,11 @@ client.on('message', function(msg){
 	    		} else if(!moduleSwitches[elem.name]){
 	    			return;
 	    		}
-	    		elem.module.processMessage(msg,command,usersData);
+	    		try{
+	    			elem.module.processMessage(msg,command,usersData);
+	    		} catch(e){
+	    			msg.reply(e);
+	    		}
 	    	});
 	    }
 	} 
