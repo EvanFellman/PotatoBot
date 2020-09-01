@@ -66,6 +66,20 @@ client.on('message', function(msg){
 				i++;
 			}
 		}
+		if(!isUserInitialized(author)){
+			usersData[author.id] = {};
+			modules.forEach(function(elem){
+				if(!(elem.name in moduleSwitches)){
+	    			moduleSwitches[elem.name] = true;
+		    		fs.writeFileSync("./moduleSwitches.json",JSON.stringify(moduleSwitches));
+	    		} else if(!moduleSwitches[elem.name]){
+	    			return;
+	    		}
+				elem.module.init(author, usersData);
+			});
+			slModule.save(author, usersData[author.id]);
+			msg.reply('you now have a Potato Account.');
+		}
 		if((command[0] === "init" || command[0] === "create") && (command.length == 2 && command[1] == "account")){	/* creates a Potato Account */
 			if(isUserInitialized(author)){
 				msg.reply('you already have a Potato Account.');
@@ -85,8 +99,6 @@ client.on('message', function(msg){
 			}
 		} else if(command.length === 1 && command[0] === "link"){
 			msg.channel.send("https://discord.com/api/oauth2/authorize?client_id=568111260504162310&permissions=8&scope=bot");
-		} else if(!isUserInitialized(author)){
-			msg.reply("you do not have a Potato Account. To make a Potato Account run `" + STARTER + "Create Account`");
 		} else if((command.length === 1 || command.length === 2) && (command[0] === "help" || command[0] === "command" || command[0] === "h")){			/* help */
 			if(command.length === 1){
 				let out = "";

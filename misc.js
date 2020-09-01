@@ -1,4 +1,5 @@
 const fs = require('fs');
+const fetch = require('node-fetch');
 module.exports = class Main{
 
 	//initializes user
@@ -7,7 +8,8 @@ module.exports = class Main{
 	//helperCommand
 	help(){
 		return {"misc": [["funny picture", "Shows a random funny photo"],
-						 ["avatar @user", "This will show a person's avatar"]]};
+						 ["avatar @user", "This will show a person's avatar"],
+						 ["roast @user", "This will bully a user"]]};
 	}
 
 	//processes a message
@@ -26,8 +28,14 @@ module.exports = class Main{
 				});
 			}
 		} else if(command[0] === "avatar"){															/* shows a user's avatar */
-	      let otherUser = msg.mentions.users.first();
-	      msg.channel.send("", {files: [otherUser.avatarURL()]});
+	      	let otherUser = msg.mentions.users.first();
+	      	msg.channel.send("", {files: [otherUser.avatarURL()]});
+	    } else if(command[0] === "roast"){
+	    	let otherUser = msg.mentions.users.first();
+	    	fetch("https://api.yomomma.info/").then(res => res.json()).then((json) => {
+	    		const firstLetter = json.joke.substring(0, 1).toLowerCase();
+	    		msg.channel.send(`Hey <@${otherUser.id}>, ${firstLetter + json.joke.substring(1)}`)
+	    	});
 	    }
 	}
 }

@@ -18,6 +18,7 @@
   "homepage": "https://github.com/EvanFellman/PotatoBot#readme",
   "dependencies": {
     "array.prototype.flatmap": "^1.2.3",
-    "discord.js": "^12.3.1"
+    "discord.js": "^12.3.1",
+    "node-fetch": "^2.6.0"
   }
 }
