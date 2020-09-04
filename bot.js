@@ -105,7 +105,7 @@ client.on('message', function(msg){
 				for(let i = 0; i < Object.keys(helpCommands).length; i++){
 					out += Object.keys(helpCommands)[i].toString() + "\n";
 				}
-				msg.channel.send({embed:{color: 15444020, title: "Use ;help <topic> to get more info about that topic\nUse ;create account to create an account\nTopics:",description: out}, split: true});
+				msg.channel.send({embed:{color: 15444020, title: "Use ;help <topic> to get more info about that topic\nTopics:",description: out}, split: true});
 			} else if(!(command[1] in helpCommands)){
 				msg.channel.send("This is not a topic that I can help with.");
 			} else {
@@ -160,13 +160,42 @@ client.on('message', function(msg){
 					msg.delete();
 					return;
 				}
-				msg.channel.messages.fetch().then(function(messages){
-					const deleteMessages = [];
-					messages.each(m => {
-						deleteMessages.push(m);
-					});
-					msg.channel.bulkDelete(deleteMessages);
-				}).catch(console.error);
+				msg.channel.send("Are you sure about that? Everything will be deleted in this channel.").then(message => {
+					message.react('👍')
+					message.react('👎');
+					const filter = (reaction, user) => {
+						return ['👍', '👎'].includes(reaction.emoji.name) && user.id === msg.author.id;
+					};
+					message.awaitReactions(filter, { max: 1, time: 60000, errors: ['time'] })
+						.then(collected => {
+							const reaction = collected.first();
+							if (reaction.emoji.name === '👍') {
+								msg.channel.messages.fetch().then(function(messages){
+									let i = 0;
+									while(i < 20){
+										msg.channel.messages.fetch().then(function(messages){
+											const deleteMessages = [];
+											messages.each(m => {
+												if(!m.pinned){
+													deleteMessages.push(m);
+												}
+											});
+											msg.channel.bulkDelete(deleteMessages);
+										}).catch(console.error);
+										i ++;
+									}
+								});
+								msg.delete();
+								message.delete();
+							} else {
+								message.delete();
+							}
+						})
+						.catch(collected => {
+							message.delete();
+						});
+				});
+				
 			} else if(command[1] === "off" && command.length === 2){
 				if(!msg.member.hasPermission("ADMINISTRATOR")){
 					msg.channel.send("You need admin permissions to run ;purge off");
@@ -184,14 +213,83 @@ client.on('message', function(msg){
 				msg.reply("This channel will no longer be purged");
 			} else if(command[1] === "me" && command.length === 2){
 				const id = msg.author.id;
-				msg.channel.messages.fetch().then(function(messages){
-					const deleteMessages = [];
-					messages.filter(m => m.author.id === id).each(m => {
-						deleteMessages.push(m);
-					});
-					msg.channel.bulkDelete(deleteMessages);
+				let message;
+				msg.channel.send("Are you sure about that?").then(message => {
+					message.react('👍')
+					message.react('👎');
+					const filter = (reaction, user) => {
+						return ['👍', '👎'].includes(reaction.emoji.name) && user.id === msg.author.id;
+					};
+					message.awaitReactions(filter, { max: 1, time: 60000, errors: ['time'] })
+						.then(async collected => {
+							const reaction = collected.first();
+							if (reaction.emoji.name === '👍') {
+								let lastId = msg.id;
+								let count = 0;
+								// msg.channel.messages.fetch().then(function(messages){
+								// 	console.log("got here");
+								// 	const deleteMessages = [];
+									// messages.each(m => {
+									// 	if(m.author.id === id && !m.pinned){
+									// 		deleteMessages.push(m);
+									// 	}
+									// 	lastId = m.id;
+									// 	count += 1;
+									// });
+									// deleteMessages.forEach(mssg => {
+									// 	try{
+									// 		mssg.delete();
+									// 	} catch(e){
+									// 		console.error(e);
+									// 	}
+									// });
+								const interval = setInterval(function(){
+									console.log(`lastId: ${lastId}`);
+									count = 0;
+									msg.channel.messages.fetch({before: lastId, limit: 100}).then(function(messages){
+										const deleteMessages = [];
+										let earliestMsg = messages.first();
+										messages.each(m => {
+											console.log(m.content);
+											if(earliestMsg.createdTimestamp > m.createdTimestamp){
+												earliestMsg = m;
+												lastId = m.id - 1;
+											}
+											if(m.author.id === id && !m.pinned){
+												console.log(m.content);
+												deleteMessages.push(m);
+											}
+											count += 1;
+										});
+										console.log(count);
+										deleteMessages.forEach(mssg => {
+											try{
+												mssg.delete();
+											} catch(e){
+												console.error(e);
+											}
+										});
+										// msg.channel.bulkDelete(deleteMessages);
+									});
+								}, 1000);
+								// });
+								// while(lastId === undefined) {
+								// 	// console.log("waiting...");
+								// }
+								
+								console.log(lastId);
+								console.log(count);
+								// 
+								msg.delete();
+								message.delete();
+							} else {
+								message.delete();
+							}
+						})
+						.catch(collected => {
+							message.delete();
+						});
 				});
-				msg.delete();
 			} else if(command.length === 2){
 				if(!msg.member.hasPermission("ADMINISTRATOR")){
 					msg.channel.send("You need admin permissions to run ;purge <hours>");
@@ -262,7 +360,9 @@ const snapChatInterval = setInterval(function(){
 			channel.messages.fetch().then(function(messages){
 				const deleteMessages = [];
 				messages.filter(m => Date.now() - m.createdTimestamp > timeAlive * 60 * 60 * 1000).each(m => {
-					deleteMessages.push(m);
+					if(!m.pinned){
+						deleteMessages.push(m);
+					}
 				});
 				channel.bulkDelete(deleteMessages);
 			}).catch(console.error);
