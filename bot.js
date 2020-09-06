@@ -19,6 +19,7 @@ const moduleSwitches = JSON.parse(fs.readFileSync("./moduleSwitches.json"));
 const slModule = new (require("./saveandload.js"))();
 let isOwner = new (require("./isOwner.js"))();
 let globalData = {};
+let clearUsers = []; //contains objects that have the following properties: channel (the object), user (the object), lastMessage (the last message that it looked at)
 /* read the token from token.txt */
 fs.readFile('DiscordToken\\token.txt', function(err,txt){
 	fs.readdir('.', function(error,files){
@@ -224,61 +225,62 @@ client.on('message', function(msg){
 						.then(async collected => {
 							const reaction = collected.first();
 							if (reaction.emoji.name === '👍') {
-								let lastId = msg.id;
-								let count = 0;
-								// msg.channel.messages.fetch().then(function(messages){
-								// 	console.log("got here");
-								// 	const deleteMessages = [];
-									// messages.each(m => {
-									// 	if(m.author.id === id && !m.pinned){
-									// 		deleteMessages.push(m);
-									// 	}
-									// 	lastId = m.id;
-									// 	count += 1;
-									// });
-									// deleteMessages.forEach(mssg => {
-									// 	try{
-									// 		mssg.delete();
-									// 	} catch(e){
-									// 		console.error(e);
-									// 	}
-									// });
-								const interval = setInterval(function(){
-									console.log(`lastId: ${lastId}`);
-									count = 0;
-									msg.channel.messages.fetch({before: lastId, limit: 100}).then(function(messages){
-										const deleteMessages = [];
-										let earliestMsg = messages.first();
-										messages.each(m => {
-											console.log(m.content);
-											if(earliestMsg.createdTimestamp > m.createdTimestamp){
-												earliestMsg = m;
-												lastId = m.id - 1;
-											}
-											if(m.author.id === id && !m.pinned){
-												console.log(m.content);
-												deleteMessages.push(m);
-											}
-											count += 1;
-										});
-										console.log(count);
-										deleteMessages.forEach(mssg => {
-											try{
-												mssg.delete();
-											} catch(e){
-												console.error(e);
-											}
-										});
-										// msg.channel.bulkDelete(deleteMessages);
-									});
-								}, 1000);
+								clearUsers.push({channel: msg.channel, user: msg.author, lastMessage: msg});
+								// let lastId = msg.id;
+								// let count = 0;
+								// // msg.channel.messages.fetch().then(function(messages){
+								// // 	console.log("got here");
+								// // 	const deleteMessages = [];
+								// 	// messages.each(m => {
+								// 	// 	if(m.author.id === id && !m.pinned){
+								// 	// 		deleteMessages.push(m);
+								// 	// 	}
+								// 	// 	lastId = m.id;
+								// 	// 	count += 1;
+								// 	// });
+								// 	// deleteMessages.forEach(mssg => {
+								// 	// 	try{
+								// 	// 		mssg.delete();
+								// 	// 	} catch(e){
+								// 	// 		console.error(e);
+								// 	// 	}
+								// 	// });
+								// const interval = setInterval(function(){
+								// 	console.log(`lastId: ${lastId}`);
+								// 	count = 0;
+								// 	msg.channel.messages.fetch({before: lastId, limit: 100}).then(function(messages){
+								// 		const deleteMessages = [];
+								// 		let earliestMsg = messages.first();
+								// 		messages.each(m => {
+								// 			console.log(m.content);
+								// 			if(earliestMsg.createdTimestamp > m.createdTimestamp){
+								// 				earliestMsg = m;
+								// 				lastId = m.id - 1;
+								// 			}
+								// 			if(m.author.id === id && !m.pinned){
+								// 				console.log(m.content);
+								// 				deleteMessages.push(m);
+								// 			}
+								// 			count += 1;
+								// 		});
+								// 		console.log(count);
+								// 		deleteMessages.forEach(mssg => {
+								// 			try{
+								// 				mssg.delete();
+								// 			} catch(e){
+								// 				console.error(e);
+								// 			}
+								// 		});
+								// 		// msg.channel.bulkDelete(deleteMessages);
+								// 	});
+								// }, 1000);
 								// });
 								// while(lastId === undefined) {
 								// 	// console.log("waiting...");
 								// }
 								
-								console.log(lastId);
-								console.log(count);
+								// console.log(lastId);
+								// console.log(count);
 								// 
 								msg.delete();
 								message.delete();
@@ -367,7 +369,26 @@ const snapChatInterval = setInterval(function(){
 				channel.bulkDelete(deleteMessages);
 			}).catch(console.error);
 		});
-
+	}
+	for(let i = 0; i < clearUsers.length; i++){
+		const user = clearUsers[i].user;
+		const channel = clearUsers[i].channel;
+		let lastMessage = clearUsers[i].lastMessage;
+		console.log(lastMessage.id);
+		channel.messages.fetch({before: lastMessage.id}).then((messages) => {
+			const deleteMessages = [];
+			messages.each(m => {
+				lastMessage = m;
+				// if(m.createdTimestamp < lastMessage.createdTimestamp){
+				// 	lastMessage = m;
+				// }
+				if(m.author.id === user.id && !m.pinned){
+					deleteMessages.push(m);
+				}
+			});
+			channel.bulkDelete(deleteMessages);
+		});
+		clearUsers[i].lastMessage = lastMessage;
 	}
 }, 10000);
 
